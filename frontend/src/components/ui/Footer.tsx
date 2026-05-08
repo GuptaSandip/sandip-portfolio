@@ -2,20 +2,20 @@ import { motion } from 'framer-motion'
 import { Github, Linkedin, Twitter, Terminal, Heart } from 'lucide-react'
 
 const LINKS = [
-  { label: 'About',      href: 'about' },
-  { label: 'Stack',      href: 'stack' },
-  { label: 'Projects',   href: 'projects' },
-  { label: 'Platforms',  href: 'platforms' },
-  { label: 'Resume',     href: 'resume' },
+  { label: 'About', href: 'about' },
+  { label: 'Stack', href: 'stack' },
+  { label: 'Projects', href: 'projects' },
+  { label: 'Platforms', href: 'platforms' },
+  { label: 'Resume', href: 'resume' },
   { label: 'Achievements', href: 'achievements' },
-  { label: 'Courses',    href: 'courses' },
-  { label: 'Contact',    href: 'contact' },
+  { label: 'Courses', href: 'courses' },
+  { label: 'Contact', href: 'contact' },
 ]
 
 const SOCIALS = [
-  { icon: Github,   href: 'https://github.com/GuptaSandip',             label: 'GitHub' },
-  { icon: Linkedin, href: 'https://linkedin.com/in/sandip-gupta11/',    label: 'LinkedIn' },
-  { icon: Twitter,  href: 'https://x.com/guptasandip11',                label: 'Twitter' },
+  { icon: Github, href: 'https://github.com/GuptaSandip', label: 'GitHub' },
+  { icon: Linkedin, href: 'https://linkedin.com/in/sandip-gupta11/', label: 'LinkedIn' },
+  { icon: Twitter, href: 'https://x.com/guptasandip11', label: 'Twitter' },
 ]
 
 export default function Footer() {
@@ -65,7 +65,7 @@ export default function Footer() {
           {/* Stack */}
           <div>
             <p style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Built With</p>
-            {['React + Vite + TypeScript', 'FastAPI + Python', 'Supabase + PostgreSQL', 'Groq (LLaMA 3.3 70B)', 'Framer Motion', 'Deployed on Vercel'].map(item => (
+            {['Agentic AI Stack', 'AI Architecture', 'Systems & Tools', 'AI Frameworks', 'AI Products', 'Production Grade Code'].map(item => (
               <div key={item} style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-2)', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#6c63ff', flexShrink: 0 }} />
                 {item}
