@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # Groq
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    HUGGINGFACE_API_KEY: str = ""
 
     # Pinecone
     PINECONE_API_KEY: str = ""

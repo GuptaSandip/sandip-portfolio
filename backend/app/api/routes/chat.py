@@ -15,6 +15,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from pydantic import BaseModel
 from groq import AsyncGroq
+import httpx
 from app.core.config import settings
 from app.core.supabase import get_supabase
 import json, re, httpx
@@ -22,15 +23,22 @@ import json, re, httpx
 router  = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
-# ── Singleton embedding model (loaded once, not per request) ───
-_embedding_model = None
-
-def get_embedding_model():
-    global _embedding_model
-    if _embedding_model is None:
-        from sentence_transformers import SentenceTransformer
-        _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _embedding_model
+async def get_hf_embedding(text: str) -> list:
+    """Fetch embeddings from Hugging Face Inference API."""
+    if not settings.HUGGINGFACE_API_KEY:
+        return []
+    
+    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(api_url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+            if response.status_code == 200:
+                return response.json()
+    except Exception as e:
+        print(f"[HF Error] {e}")
+    return []
 
 
 # ── Build system prompt dynamically from DB ────────────────────
@@ -196,16 +204,14 @@ async def chat(request: Request, body: ChatRequest):
 
 
 async def _get_rag_context(query: str) -> str:
-    if not query.strip():
+    if not settings.PINECONE_API_KEY:
         return ""
     try:
         from pinecone import Pinecone
-        import asyncio
-
-        # Load model once (singleton) and run in thread to avoid blocking event loop
-        model     = get_embedding_model()
-        loop      = asyncio.get_event_loop()
-        embedding = await loop.run_in_executor(None, lambda: model.encode(query).tolist())
+        
+        embedding = await get_hf_embedding(query)
+        if not embedding:
+            return ""
 
         pc      = Pinecone(api_key=settings.PINECONE_API_KEY)
         index   = pc.Index(settings.PINECONE_INDEX)
