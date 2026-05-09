@@ -24,9 +24,13 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Safety check — log what origins are being used at startup
+origins = settings.origins_list
+print(f"[CORS] Allowed origins: {origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.origins_list,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,7 +47,7 @@ app.include_router(resume.router,          prefix="/api/resume")
 app.include_router(github.router,          prefix="/api/github")
 app.include_router(contact.router,         prefix="/api/contact")
 app.include_router(payments.router,        prefix="/api/payments")
-app.include_router(auth_route.router,            prefix="/api/auth")
+app.include_router(auth_route.router,      prefix="/api/auth")
 app.include_router(admin.router,           prefix="/api/admin")
 
 
@@ -53,4 +57,7 @@ async def health():
 
 @app.get("/")
 async def root():
-    return {"message":"Backend is running","other api":['api/health','api/docs']}
+    return {
+        "message": "Backend is running",
+        "other_api": ["/api/health", "/api/docs"],
+    }

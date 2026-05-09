@@ -1,3 +1,4 @@
+# chat.py
 """
 backend/app/api/routes/chat.py
 Agentic chatbot with:
@@ -21,6 +22,17 @@ import json, re, httpx
 router  = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
+# ── Singleton embedding model (loaded once, not per request) ───
+_embedding_model = None
+
+def get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None:
+        from sentence_transformers import SentenceTransformer
+        _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedding_model
+
+
 # ── Build system prompt dynamically from DB ────────────────────
 async def build_system_prompt() -> str:
     """Fetch live data from Supabase to build an up-to-date system prompt."""
@@ -30,7 +42,6 @@ async def build_system_prompt() -> str:
         proj = sb.table("projects").select("title,description,tech_tags,github_url,live_url").eq("is_visible", True).order("display_order").limit(10).execute().data or []
         tech = sb.table("tech_stack").select("name,category,level").eq("is_visible", True).order("display_order").execute().data or []
 
-        # Also fetch custom knowledge base entries if table exists
         try:
             kb = sb.table("chatbot_knowledge").select("content").eq("is_active", True).execute().data or []
             kb_text = "\n".join(f"- {k['content']}" for k in kb)
@@ -108,7 +119,6 @@ If you genuinely don't know something specific:
         return prompt
 
     except Exception:
-        # Fallback static prompt if DB unreachable
         return """You are an AI assistant for Sandip Gupta's portfolio.
 Sandip is an AI Engineer and Master Trainer specializing in LLMs, Agentic AI, Data Science.
 Answer questions about his work warmly and concisely (2-4 sentences).
@@ -137,15 +147,12 @@ async def chat(request: Request, body: ChatRequest):
             yield "data: [DONE]\n\n"
         return StreamingResponse(no_key(), media_type="text/event-stream")
 
-    # Build dynamic system prompt from live DB data
     system_prompt = await build_system_prompt()
 
-    # Last 6 messages only (saves tokens)
-    history = body.messages[-6:]
+    history  = body.messages[-6:]
     messages = [{"role": "system", "content": system_prompt}]
     messages += [{"role": m.role, "content": m.content} for m in history]
 
-    # RAG context from Pinecone
     if settings.PINECONE_API_KEY and history:
         try:
             rag = await _get_rag_context(history[-1].content)
@@ -193,10 +200,12 @@ async def _get_rag_context(query: str) -> str:
         return ""
     try:
         from pinecone import Pinecone
-        from sentence_transformers import SentenceTransformer
+        import asyncio
 
-        model     = SentenceTransformer("all-MiniLM-L6-v2")
-        embedding = model.encode(query).tolist()
+        # Load model once (singleton) and run in thread to avoid blocking event loop
+        model     = get_embedding_model()
+        loop      = asyncio.get_event_loop()
+        embedding = await loop.run_in_executor(None, lambda: model.encode(query).tolist())
 
         pc      = Pinecone(api_key=settings.PINECONE_API_KEY)
         index   = pc.Index(settings.PINECONE_INDEX)
@@ -210,7 +219,6 @@ async def _get_rag_context(query: str) -> str:
 async def _handle_markers(text: str, session_id: str | None):
     sb = get_supabase()
 
-    # Lead captured
     lead = re.search(r"LEAD_CAPTURED:(\{[^}]*\})", text)
     if lead:
         try:
@@ -230,7 +238,6 @@ async def _handle_markers(text: str, session_id: str | None):
         except Exception:
             pass
 
-    # Unknown question
     unknown = re.search(r"UNKNOWN_QUESTION:(\{[^}]*\})", text)
     if unknown:
         try:
