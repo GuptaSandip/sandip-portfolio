@@ -146,7 +146,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Sidebar */}
-      <aside className={sidebarOpen ? 'admin-sidebar open' : 'admin-sidebar'} style={{ width: '232px', background: 'var(--bg-surface)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 40, top: 0 }}>
+      <aside className={sidebarOpen ? 'admin-sidebar open' : 'admin-sidebar'} style={{ width: '232px', background: 'var(--bg-surface)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 60, top: 0 }}>
         <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
