@@ -72,7 +72,7 @@
 //   )
 // }
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '@/store'
@@ -80,6 +80,7 @@ import {
   LayoutDashboard, User, Code2, FolderKanban, Trophy,
   BookOpen, FileText, MessageSquare, LogOut, Terminal,
   Users, HelpCircle, ChevronRight, Briefcase, Github,
+  Menu, X,
 } from 'lucide-react'
 import BioEditor          from '@/components/admin/editors/BioEditor'
 import ProjectsEditor     from '@/components/admin/editors/ProjectsEditor'
@@ -114,28 +115,51 @@ const MENU = [
 ]
 
 export default function AdminDashboard() {
-  const logout   = useAuthStore(s => s.logout)
-  const navigate = useNavigate()
-  const location = useLocation()
-  const currentPath = location.pathname.replace('/admin/', '').replace('/admin', '')
+  const logout       = useAuthStore(s => s.logout)
+  const navigate     = useNavigate()
+  const location     = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const currentPath  = location.pathname.replace('/admin/', '').replace('/admin', '')
+
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
 
   function go(path: string) {
+    setSidebarOpen(false)
     navigate(path ? `/admin/${path}` : '/admin')
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
-
-      {/* Sidebar */}
-      <aside style={{ width: '232px', background: 'var(--bg-surface)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 40, top: 0 }}>
-        <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Terminal size={15} style={{ color: '#6c63ff' }} />
-          </div>
+    <div className="admin-shell">
+      <div className="admin-mobile-bar">
+        <button className="admin-mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open navigation">
+          <Menu size={18} />
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Terminal size={18} style={{ color: '#6c63ff' }} />
           <div>
             <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>sandip.dev</div>
             <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)' }}>Admin Panel</div>
           </div>
+        </div>
+      </div>
+
+      {/* Sidebar */}
+      <aside className={sidebarOpen ? 'admin-sidebar open' : 'admin-sidebar'} style={{ width: '232px', background: 'var(--bg-surface)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 40, top: 0 }}>
+        <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Terminal size={15} style={{ color: '#6c63ff' }} />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>sandip.dev</div>
+              <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)' }}>Admin Panel</div>
+            </div>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} aria-label="Close navigation" style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', cursor: 'pointer' }}>
+            <X size={18} />
+          </button>
         </div>
 
         <nav style={{ flex: 1, padding: '10px 8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -164,8 +188,10 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
+      {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
       {/* Main */}
-      <main style={{ flex: 1, marginLeft: '232px', minHeight: '100vh', overflowY: 'auto', padding: '2rem' }}>
+      <main className="admin-main" style={{ flex: 1, marginLeft: '232px', minHeight: '100vh', overflowY: 'auto', padding: '2rem' }}>
         <AnimatePresence mode="wait">
           <motion.div key={location.pathname}
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
