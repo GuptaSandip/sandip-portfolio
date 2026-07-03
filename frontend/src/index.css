@@ -614,7 +614,16 @@
 
 .admin-sidebar {
   transition: transform 0.25s ease;
-    will-change: transform;
+  will-change: transform;
+  z-index: 80;
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .admin-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: fixed;
     top: 0;
     left: 0;
@@ -632,9 +641,10 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 260px;
-    z-index: 70;
+    width: 100%;
+    z-index: 80;
     box-shadow: 24px 0 48px rgba(0, 0, 0, 0.18);
+    max-width: 360px;
   }
 
   .admin-sidebar.open {
@@ -645,8 +655,9 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: 70;
     background: rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
   }
 
   .admin-main {
