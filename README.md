@@ -5,51 +5,48 @@
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![AI Powered](https://img.shields.io/badge/AI-Llama3%20%2B%20Pinecone-blue?style=for-the-badge&logo=meta)](https://groq.com/)
 
-A polished, professional portfolio for an **AI Engineer & Master Trainer**. This full-stack project combines a modern frontend, a secure admin dashboard, and an AI-driven chatbot powered by RAG.
+A polished, professional portfolio for an **AI Engineer & Master Trainer**. This full-stack project combines a modern frontend, a secure admin dashboard, and an AI-powered chatbot.
 
 ---
 
 ## ✨ Project Overview
 
-This repository delivers a complete personal branding site with a strong focus on AI, performance, and usability.
+This repository showcases a complete personal branding website with a strong focus on AI, frontend polish, and backend manageability.
 
-- **Public-facing portfolio** with responsive sections for about, skills, projects, experience, and contact.
-- **Admin management system** for updating portfolio content in real time.
-- **RAG chatbot** designed to answer visitor questions using your portfolio knowledge base.
-- **Modern, responsive design** with motion effects and polished UI components.
-- **Deployment-ready structure** for frontend and backend hosting.
+- Responsive public portfolio with sections for about, skills, projects, experience, and contact.
+- Admin dashboard for managing portfolio content, media, and inquiries.
+- Retrieval-Augmented Generation (RAG) chatbot that answers questions from site data.
+- Full-stack architecture engineered for deployment and scalability.
 
 ---
 
 ## 🚀 Key Features
 
-### AI-Powered Portfolio Chatbot
-- Retrieval-Augmented Generation via **Pinecone** and **Groq Llama 3**.
-- Answers questions using portfolio content, project details, and professional experience.
-- Enables intelligent conversations tailored to visitors.
+### AI Portfolio Chatbot
+- Context-aware responses using **Pinecone** and **Groq Llama 3**.
+- Intelligent answers powered by portfolio content, project details, and professional expertise.
+- Streamlined chat experience built for visitors and recruiters.
 
 ### Admin Dashboard
-- Secure CRUD interface for projects, achievements, courses, and tech stack.
-- Upload media assets through **Supabase Storage**.
-- Manage leads and contact messages from an admin console.
+- Secure admin area with JWT-based authentication.
+- Manage projects, achievements, courses, tech stack, and contact leads.
+- Upload media assets using **Supabase Storage**.
 
 ### Frontend Experience
 - Built with **React + Vite** for speed and developer productivity.
-- Responsive layout optimized for desktop, tablet, and mobile.
-- Smooth transitions and subtle animations using **Framer Motion**.
-- Clean navigation with scroll-linked section anchors.
+- Modern responsive design with smooth animations and subtle transitions.
+- Clean navigation, mobile-friendly menu, and section-based scrolling.
 
 ### Backend Architecture
-- **FastAPI** backend serving secure REST APIs.
-- **Supabase PostgreSQL** for data storage and authentication.
-- JWT-based admin authentication.
-- Structured API endpoints for consistent frontend integration.
+- **FastAPI** REST API powering content and AI endpoints.
+- **Supabase PostgreSQL** for data storage and auth.
+- Robust API structure for scalable content delivery.
 
 ---
 
 ## 🧰 Technology Stack
 
-Frontend:
+**Frontend**
 - React
 - Vite
 - Tailwind CSS / Vanilla CSS
@@ -57,14 +54,14 @@ Frontend:
 - Lucide Icons
 - React Router
 
-Backend:
+**Backend**
 - Python 3
 - FastAPI
 - Supabase
 - JWT Authentication
-- Pydantic models
+- Pydantic
 
-AI & Data:
+**AI & Data**
 - Groq Llama 3
 - HuggingFace embeddings
 - Pinecone vector DB
@@ -72,11 +69,49 @@ AI & Data:
 
 ---
 
+## 🏗️ Architecture Diagrams
+
+### Project Schema
+
+```mermaid
+graph LR
+  A[Visitor / Admin] -->|Browser| B[React Frontend]
+  B -->|API Requests| C[FastAPI Backend]
+  C -->|CRUD / Content| D[Supabase PostgreSQL]
+  C -->|Media Uploads| E[Supabase Storage]
+  C -->|Vector Search| F[Pinecone]
+  C -->|LLM Inference| G[Groq Llama 3]
+  B -->|Static Assets| H[Vercel / Hosting]
+  subgraph DataLayer [Data & AI]
+    D
+    E
+    F
+    G
+  end
+``` 
+
+### Chatbot Workflow
+
+```mermaid
+graph TB
+  U[User Question] -->|Send| FFE[Frontend Chat Widget]
+  FFE -->|Request| API[FastAPI Chat Endpoint]
+  API -->|Embed Query| HF[HuggingFace Embeddings]
+  HF -->|Search| P[Pinecone Vector DB]
+  P -->|Context| RAG[RAG Engine]
+  RAG -->|Prompt| LLM[Groq Llama 3]
+  LLM -->|Answer| API
+  API -->|Response| FFE
+  FFE -->|Render| U
+``` 
+
+---
+
 ## 📁 Repository Structure
 
-- `frontend/` — React application with public site and admin panel.
-- `backend/` — FastAPI backend with authentication, portfolio APIs, and chatbot endpoints.
-- `supabase/` — Database schema and migration scripts.
+- `frontend/` — React application with the public portfolio and admin interface.
+- `backend/` — FastAPI application serving REST APIs, auth, and AI routes.
+- `supabase/` — Supabase schema and migration scripts.
 - `plan.txt` — Project notes and roadmap.
 
 ---
@@ -116,26 +151,16 @@ npm run dev
 
 ---
 
-## 🧩 Architecture Summary
-
-This project separates responsibilities across three main layers:
-
-1. **Frontend** renders the portfolio website and admin experience.
-2. **Backend** handles authentication, data APIs, and AI orchestration.
-3. **AI/Data layer** uses **Pinecone** and **Groq** for contextual chatbot responses.
-
----
-
 ## 🌐 Deployment
 
-- Frontend is optimized for deployment on **Vercel**.
-- Backend can be deployed to any FastAPI-compatible host.
-- Supabase manages the database, authentication, and media storage.
+- Frontend is ready for **Vercel** deployment.
+- Backend can be deployed on any FastAPI-compatible host.
+- Supabase manages database, auth, and media storage.
 
 ---
 
 ## 👤 About Sandip Gupta
-Sandip is an AI engineer and master trainer building intelligent, production-ready applications for data-driven businesses.
+Sandip is an AI engineer and master trainer building intelligent, production-ready applications for data-driven companies.
 
 - Portfolio: https://sandipgupta.is-a.dev
 - LinkedIn: https://www.linkedin.com/in/sandipgupta-ai/
@@ -143,4 +168,4 @@ Sandip is an AI engineer and master trainer building intelligent, production-rea
 ---
 
 ## 📄 License
-This project is available under the MIT License.
+This project is licensed under the MIT License.
