@@ -357,6 +357,7 @@
     margin: 0 auto;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 16px;
     padding: 10px 12px 10px 16px;
     background: #E8E0D0;
