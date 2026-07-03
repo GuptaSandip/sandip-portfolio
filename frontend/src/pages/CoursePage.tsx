@@ -180,7 +180,7 @@ export default function CoursePage() {
         `INSTRUCTOR`,
         `----------`,
         `Sandip Gupta — Master Trainer, AI Engineer`,
-        `LinkedIn: https://linkedin.com/in/sandip-gupta11/`,
+        `LinkedIn: https://www.linkedin.com/in/sandipgupta-ai/`,
         `GitHub: https://github.com/GuptaSandip`,
         ``,
         `To enroll: ${window.location.href}`,

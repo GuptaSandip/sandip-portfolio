@@ -11,6 +11,7 @@ from app.models.course import CourseCreate, CourseUpdate, CourseToggle, Enrollme
 from app.models.experience import ExperienceCreate, ExperienceUpdate
 from app.models.resume_overview import ResumeOverviewCreate, ResumeOverviewUpdate
 from app.models.knowledge import KnowledgeCreate, KnowledgeUpdate
+from app.models.pinned_repo import PinnedRepoCreate, PinnedRepoUpdate
 import io, csv
 
 router = APIRouter(dependencies=[Depends(get_current_admin)])
@@ -440,4 +441,33 @@ async def admin_get_contacts():
 @router.delete("/contacts/{cid}")
 async def admin_delete_contact(cid: str):
     db().table("contact_messages").delete().eq("id", cid).execute()
-    return {"deleted": True}
+    return {"deleted": True}
+
+
+# ── Pinned GitHub Repos ───────────────────────────────────────
+@router.get("/pinned-repos")
+async def admin_get_pinned_repos():
+    return db().table("pinned_repos").select("*").order("display_order").execute().data or []
+
+
+@router.post("/pinned-repos")
+async def admin_create_pinned_repo(data: PinnedRepoCreate):
+    result = db().table("pinned_repos").insert(data.model_dump()).execute()
+    if not result.data:
+        raise HTTPException(500, "Create failed")
+    return result.data[0]
+
+
+@router.put("/pinned-repos/{rid}")
+async def admin_update_pinned_repo(rid: str, data: PinnedRepoUpdate):
+    payload = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = db().table("pinned_repos").update(payload).eq("id", rid).execute()
+    if not result.data:
+        raise HTTPException(404, "Pinned repo not found")
+    return result.data[0]
+
+
+@router.delete("/pinned-repos/{rid}")
+async def admin_delete_pinned_repo(rid: str):
+    db().table("pinned_repos").delete().eq("id", rid).execute()
+    return {"deleted": True}

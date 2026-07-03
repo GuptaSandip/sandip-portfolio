@@ -16,9 +16,9 @@ create table if not exists bio (
     'Turning Complex AI into Simple Solutions'
   ],
   about           text not null default 'I''m Sandip Gupta — an AI engineer and Master Trainer who builds production-grade applications with LLMs, agentic AI, and modern AI frameworks. I spend my days creating real-world AI systems, experimenting with autonomous workflows, and teaching others to build and think in AI. When I''m not coding or training, I''m exploring the bleeding edge of Gen AI and turning complex concepts into practical, working solutions.',
-  email           text default 'contact@sandipgupta.dev',
+  email           text default 'jobsforsandipgupta@gmail.com',
   location        text default 'India',
-  linkedin_url    text default 'https://www.linkedin.com/in/sandip-gupta11/',
+  linkedin_url    text default 'https://www.linkedin.com/in/sandipgupta-ai/',
   github_url      text default 'https://github.com/GuptaSandip',
   twitter_url     text default 'https://x.com/guptasandip11',
   hackerrank_url  text default 'https://www.hackerrank.com/profile/sandip_gupta_111',
@@ -204,3 +204,20 @@ create table if not exists resume_overview (
 );
 alter table resume_overview enable row level security;
 create policy "pub_resume_ov" on resume_overview for select using (true);
+
+-- 11. PINNED GITHUB REPOS ─────────────────────────────────
+create table if not exists pinned_repos (
+  id            uuid primary key default uuid_generate_v4(),
+  name          text not null,
+  description   text,
+  repo_url      text not null,
+  stars         integer default 0,
+  forks         integer default 0,
+  language      text,
+  lang_color    text default '#3572A5',
+  display_order smallint default 0,
+  is_visible    boolean default true,
+  created_at    timestamptz default now()
+);
+alter table pinned_repos enable row level security;
+create policy "pub_pinned_repos" on pinned_repos for select using (is_visible = true);

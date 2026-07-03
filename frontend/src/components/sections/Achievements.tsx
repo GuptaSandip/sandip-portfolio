@@ -6,7 +6,7 @@ import { getAccomplishments } from '@/lib/supabase'
 import type { Accomplishment } from '@/types'
 
 const CATEGORY_META: Record<string, { icon: typeof Trophy; color: string; label: string }> = {
-  patent:        { icon: Zap,      color: '#6c63ff', label: 'Patent'        },
+  patent:        { icon: Zap,      color: 'var(--accent)', label: 'Patent'        },
   award:         { icon: Trophy,   color: '#fbbf24', label: 'Award'         },
   publication:   { icon: FileText, color: '#00d4ff', label: 'Publication'   },
   certification: { icon: Star,     color: '#34d399', label: 'Certification' },
@@ -33,25 +33,21 @@ export default function Achievements() {
 
   if (loading) {
     return (
-      <section id="achievements" style={{ padding: '6rem 1.5rem' }}>
-        <div style={{ maxWidth: '72rem', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #6c63ff', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+      <section id="achievements" style={{ padding: '7rem 1.75rem' }}>
+        <div style={{ maxWidth: '68rem', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--accent)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         </div>
       </section>
     )
   }
 
   return (
-    <section id="achievements" style={{ padding: '6rem 1.5rem', position: 'relative' }}>
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '30%', right: '10%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.06), transparent)', filter: 'blur(60px)' }} />
-      </div>
-
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="achievements" style={{ padding: '7rem 1.75rem', position: 'relative' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <SectionLabel text="Achievements" />
           <FadeUp delay={0.05}>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
               Patents &amp; <span className="gradient-text">Recognition</span>
             </h2>
           </FadeUp>
@@ -70,10 +66,11 @@ export default function Achievements() {
               return (
                 <StaggerItem key={item.id}>
                   <motion.div
-                    whileHover={{ y: -5, borderColor: meta.color + '55', boxShadow: `0 12px 32px ${meta.color}15` }}
-                    style={{ padding: '1.5rem', borderRadius: '16px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', height: '100%', display: 'flex', flexDirection: 'column', gap: '12px', transition: 'border-color 0.25s, box-shadow 0.25s', position: 'relative', overflow: 'hidden' }}
+                    className="surface-card"
+                    whileHover={{ y: -4, borderColor: 'rgba(184,137,82,0.35)' }}
+                    style={{ padding: '1.75rem', borderRadius: '16px', height: '100%', display: 'flex', flexDirection: 'column', gap: '12px', transition: 'border-color 0.25s, transform 0.25s', position: 'relative', overflow: 'hidden' }}
                   >
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, ${meta.color}, transparent)` }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'var(--accent)', opacity: 0.4 }} />
 
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                       <motion.div
@@ -90,7 +87,7 @@ export default function Achievements() {
                     </div>
 
                     <div>
-                      <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '6px', lineHeight: 1.3 }}>
+                      <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '6px', lineHeight: 1.3 }}>
                         {item.title}
                       </h3>
                       {item.issuer && (

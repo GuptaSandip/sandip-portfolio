@@ -29,25 +29,21 @@ export default function Courses() {
 
   if (loading) {
     return (
-      <section id="courses" style={{ padding: '6rem 1.5rem' }}>
-        <div style={{ maxWidth: '72rem', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #6c63ff', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+      <section id="courses" style={{ padding: '7rem 1.75rem' }}>
+        <div style={{ maxWidth: '68rem', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--accent)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         </div>
       </section>
     )
   }
 
   return (
-    <section id="courses" style={{ padding: '6rem 1.5rem', position: 'relative' }}>
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', bottom: '20%', left: '5%', width: '350px', height: '350px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(108,99,255,0.07), transparent)', filter: 'blur(60px)' }} />
-      </div>
-
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="courses" style={{ padding: '7rem 1.75rem', position: 'relative' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <SectionLabel text="Courses" />
           <FadeUp delay={0.05}>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
               Learn <span className="gradient-text">AI With Me</span>
             </h2>
           </FadeUp>
@@ -61,16 +57,17 @@ export default function Courses() {
         <StaggerContainer stagger={0.1}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
             {courses.map(course => {
-              const levelColor = LEVEL_COLOR[course.level] ?? '#6c63ff'
+              const levelColor = LEVEL_COLOR[course.level] ?? 'var(--accent)'
               return (
                 <StaggerItem key={course.id}>
                   <motion.div
-                    whileHover={{ y: -6, boxShadow: '0 16px 48px rgba(108,99,255,0.18)', borderColor: 'rgba(108,99,255,0.4)' }}
-                    style={{ borderRadius: '20px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'border-color 0.25s, box-shadow 0.25s', cursor: 'pointer' }}
+                    className="surface-card"
+                    whileHover={{ y: -4, borderColor: 'rgba(184,137,82,0.35)' }}
+                    style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'border-color 0.25s, transform 0.25s', cursor: 'pointer' }}
                     onClick={() => navigate(`/courses/${course.slug}`)}
                   >
                     {/* Thumbnail */}
-                    <div style={{ height: '180px', background: course.thumbnail_url ? `url(${course.thumbnail_url}) center/cover` : 'linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,212,255,0.1))', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ height: '180px', background: course.thumbnail_url ? `url(${course.thumbnail_url}) center/cover` : 'var(--bg-panel)', position: 'relative', overflow: 'hidden' }}>
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6))', pointerEvents: 'none' }} />
 
                       {/* Badges */}
@@ -88,14 +85,14 @@ export default function Courses() {
                       {/* icon if no thumbnail */}
                       {!course.thumbnail_url && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <BookOpen size={48} style={{ color: 'rgba(108,99,255,0.4)' }} />
+                          <BookOpen size={48} style={{ color: 'rgba(184,137,82,0.4)' }} />
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '17px', color: 'var(--text-1)', lineHeight: 1.3, margin: 0 }}>
+                      <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '17px', color: 'var(--text-1)', lineHeight: 1.3, margin: 0 }}>
                         {course.title}
                       </h3>
 
@@ -121,9 +118,9 @@ export default function Courses() {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid var(--bd)' }}>
                         <div>
                           {course.is_free ? (
-                            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '18px', color: '#34d399' }}>Free</span>
+                            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '18px', color: '#34d399' }}>Free</span>
                           ) : (
-                            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--text-1)' }}>₹{course.price}</span>
+                            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '18px', color: 'var(--text-1)' }}>₹{course.price}</span>
                           )}
                         </div>
                         <motion.button

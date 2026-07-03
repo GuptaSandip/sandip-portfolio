@@ -24,14 +24,14 @@ export default function About() {
   }, [])
 
   if (loading) return (
-    <section id="about" style={{ padding: '6rem 1.5rem', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #6c63ff', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+    <section id="about" style={{ padding: '7rem 1.75rem', display: 'flex', justifyContent: 'center' }}>
+      <div className="spinner" />
     </section>
   )
 
   return (
-    <section id="about" style={{ padding: '6rem 1.5rem', position: 'relative' }}>
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="about" style={{ padding: '7rem 1.75rem', position: 'relative' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '5rem', alignItems: 'start' }}>
 
@@ -44,7 +44,7 @@ export default function About() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ type: 'spring', damping: 15 }}
-                  style={{ width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #6c63ff', boxShadow: '0 8px 32px rgba(108,99,255,0.25)', flexShrink: 0 }}
+                  style={{ width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--accent)', boxShadow: '0 8px 32px rgba(184,137,82,0.25)', flexShrink: 0 }}
                 >
                   <img src={bio.avatar_url} alt="Sandip Gupta" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </motion.div>
@@ -53,7 +53,7 @@ export default function About() {
             </div>
 
             <FadeUp delay={0.05}>
-              <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1.5rem', letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1.5rem', letterSpacing: '-0.02em' }}>
                 Building AI.<br />
                 <span className="gradient-text">Teaching AI.</span>
               </h2>
@@ -76,15 +76,15 @@ export default function About() {
               {[
                 { icon: MapPin, label: 'Location', value: bio?.location || 'India' },
                 { icon: Briefcase, label: 'Role', value: bio?.title || 'Master Trainer · AI Engineer' },
-                { icon: Calendar, label: 'Experience', value: '3+ Years Training' },
+                { icon: Calendar, label: 'Experience', value: '3+ Years Experience' },
               ].map(({ icon: Icon, label, value }) => (
                 <StaggerItem key={label}>
-                  <motion.div whileHover={{ x: 4 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', marginBottom: '10px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s' }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(108,99,255,0.35)')}
+                  <motion.div whileHover={{ x: 4 }} className="surface-card"
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', borderRadius: '12px', marginBottom: '10px', transition: 'border-color 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(184,137,82,0.35)')}
                     onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--bd)')}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon size={16} style={{ color: '#6c63ff' }} />
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(184,137,82,0.12)', border: '1px solid rgba(184,137,82,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={16} style={{ color: 'var(--accent)' }} />
                     </div>
                     <div>
                       <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
@@ -100,8 +100,8 @@ export default function About() {
               <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {[
                   { label: 'HuggingFace', href: bio?.huggingface_url || 'https://huggingface.co/guptasandip', color: '#ff9d00' },
-                  { label: 'GitHub', href: bio?.github_url || 'https://github.com/GuptaSandip', color: '#6c63ff' },
-                  { label: 'LinkedIn', href: bio?.linkedin_url || 'https://linkedin.com/in/sandip-gupta11/', color: '#0077b5' },
+                  { label: 'GitHub', href: bio?.github_url || 'https://github.com/GuptaSandip', color: 'var(--accent)' },
+                  { label: 'LinkedIn', href: bio?.linkedin_url || 'https://www.linkedin.com/in/sandipgupta-ai/', color: '#0077b5' },
                   { label: 'Twitter', href: bio?.twitter_url || 'https://x.com/guptasandip11', color: '#1da1f2' },
                 ].map(({ label, href, color }) => (
                   <motion.a key={label} href={href} target="_blank" rel="noopener noreferrer"
@@ -117,14 +117,14 @@ export default function About() {
           {/* ── Right: Timeline ───────────────────────────── */}
           <div>
             <FadeUp>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '5px 14px', borderRadius: '9999px', marginBottom: '12px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.25)', color: '#a8a8ff', fontSize: '11px', fontFamily: 'monospace' }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#6c63ff', display: 'inline-block' }} />
-                CAREER JOURNEY
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ width: '20px', height: '1px', background: 'var(--accent)', display: 'inline-block' }} />
+                <span className="mono-label">Career Journey</span>
               </div>
             </FadeUp>
 
             <FadeUp delay={0.05}>
-              <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: 'var(--text-1)', lineHeight: 1.2, margin: '0 0 2rem', letterSpacing: '-0.01em' }}>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: 'var(--text-1)', lineHeight: 1.2, margin: '0 0 2rem', letterSpacing: '-0.01em' }}>
                 Experience &amp;<br />
                 <span className="gradient-text">Timeline</span>
               </h2>
@@ -136,7 +136,7 @@ export default function About() {
               <motion.div
                 initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
-                style={{ position: 'absolute', left: '17px', top: '8px', bottom: '8px', width: '1.5px', background: 'linear-gradient(to bottom, #6c63ff, rgba(108,99,255,0.1))', transformOrigin: 'top', zIndex: 0 }}
+                style={{ position: 'absolute', left: '17px', top: '8px', bottom: '8px', width: '1.5px', background: 'linear-gradient(to bottom, var(--accent), rgba(184,137,82,0.1))', transformOrigin: 'top', zIndex: 0 }}
               />
 
               {experience.map((exp, i) => (
@@ -150,20 +150,20 @@ export default function About() {
                   {/* dot */}
                   <div style={{ flexShrink: 0, marginTop: '4px' }}>
                     <motion.div
-                      animate={exp.is_current ? { boxShadow: ['0 0 0px rgba(108,99,255,0.4)', '0 0 16px rgba(108,99,255,0.7)', '0 0 0px rgba(108,99,255,0.4)'] } : {}}
+                      animate={exp.is_current ? { boxShadow: ['0 0 0px rgba(184,137,82,0.4)', '0 0 16px rgba(184,137,82,0.7)', '0 0 0px rgba(184,137,82,0.4)'] } : {}}
                       transition={{ duration: 2.5, repeat: Infinity }}
-                      style={{ width: '34px', height: '34px', borderRadius: '50%', background: exp.is_current ? '#6c63ff' : 'var(--bg-surface)', border: `2px solid ${exp.is_current ? '#6c63ff' : 'var(--bd)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      style={{ width: '34px', height: '34px', borderRadius: '50%', background: exp.is_current ? 'var(--accent)' : 'var(--bg-surface)', border: `2px solid ${exp.is_current ? 'var(--accent)' : 'var(--bd)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Briefcase size={14} style={{ color: exp.is_current ? 'white' : 'var(--text-2)' }} />
                     </motion.div>
                   </div>
 
                   {/* card */}
-                  <motion.div whileHover={{ borderColor: 'rgba(108,99,255,0.4)', y: -2 }}
-                    style={{ flex: 1, padding: '1.25rem', borderRadius: '14px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s' }}>
+                  <motion.div whileHover={{ borderColor: 'rgba(184,137,82,0.35)', y: -2 }} className="surface-card"
+                    style={{ flex: 1, padding: '1.25rem', borderRadius: '14px', transition: 'border-color 0.2s' }}>
 
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
                       <div>
-                        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--text-1)' }}>{exp.role}</div>
+                        <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: '15px', color: 'var(--text-1)' }}>{exp.role}</div>
                         <div style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '2px' }}>{exp.company}</div>
                       </div>
                       {exp.is_current && (
@@ -173,7 +173,7 @@ export default function About() {
                       )}
                     </div>
 
-                    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#6c63ff', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--accent)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Calendar size={11} /> {exp.start_date} – {exp.is_current ? 'Present' : exp.end_date}
                     </div>
 

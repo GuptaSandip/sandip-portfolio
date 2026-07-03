@@ -4,10 +4,10 @@ import { Send, Github, Linkedin, Twitter, Mail, MapPin, MessageSquare, CheckCirc
 import { FadeUp, SlideLeft, SlideRight, SectionLabel } from './AnimatedSection'
 
 const SOCIALS = [
-  { icon: Github,   label: 'GitHub',    href: 'https://github.com/GuptaSandip',             handle: '@GuptaSandip',       color: '#6c63ff' },
-  { icon: Linkedin, label: 'LinkedIn',  href: 'https://linkedin.com/in/sandip-gupta11/',    handle: 'sandip-gupta11',     color: '#0077b5' },
-  { icon: Twitter,  label: 'X/Twitter', href: 'https://x.com/guptasandip11',                handle: '@guptasandip11',     color: '#1da1f2' },
-  { icon: Mail,     label: 'Email',     href: 'mailto:contact@sandipgupta.dev',              handle: 'contact@sandipgupta.dev', color: '#34d399' },
+  { icon: Github,   label: 'GitHub',    href: 'https://github.com/GuptaSandip',                    handle: '@GuptaSandip',              color: 'var(--accent)' },
+  { icon: Linkedin, label: 'LinkedIn',  href: 'https://www.linkedin.com/in/sandipgupta-ai/',       handle: 'sandipgupta-ai',            color: '#0077b5' },
+  { icon: Twitter,  label: 'X/Twitter', href: 'https://x.com/guptasandip11',                     handle: '@guptasandip11',            color: '#1da1f2' },
+  { icon: Mail,     label: 'Email',     href: 'mailto:jobsforsandipgupta@gmail.com',              handle: 'jobsforsandipgupta@gmail.com', color: 'var(--accent)' },
 ]
 
 const ease = [0.21, 0.47, 0.32, 0.98] as const
@@ -41,16 +41,12 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" style={{ padding: '6rem 1.5rem', position: 'relative' }}>
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', bottom: '10%', left: '5%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(108,99,255,0.07), transparent)', filter: 'blur(60px)' }} />
-      </div>
-
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="contact" style={{ padding: '7rem 1.75rem', position: 'relative' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <SectionLabel text="Contact" />
           <FadeUp delay={0.05}>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
               Let's <span className="gradient-text">Connect</span>
             </h2>
           </FadeUp>
@@ -67,19 +63,19 @@ export default function Contact() {
           <SlideLeft>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {/* Status */}
-              <motion.div whileHover={{ borderColor: 'rgba(52,211,153,0.4)' }}
-                style={{ padding: '1.25rem', borderRadius: '14px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'border-color 0.2s' }}>
-                <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}
-                  style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px rgba(52,211,153,0.7)', marginTop: '4px', flexShrink: 0 }} />
+              <motion.div whileHover={{ borderColor: 'rgba(184,137,82,0.35)' }} className="surface-card"
+                style={{ padding: '1.25rem', borderRadius: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'border-color 0.2s' }}>
+                <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}
+                  style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', marginTop: '5px', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--text-1)', marginBottom: '4px' }}>Open to Opportunities</div>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: '14px', color: 'var(--text-1)', marginBottom: '4px' }}>Open to Opportunities</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.6 }}>Currently employed full-time but selectively open to interesting freelance and consulting work in AI/ML.</div>
                 </div>
               </motion.div>
 
               {/* Location */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-surface)', border: '1px solid var(--bd)' }}>
-                <MapPin size={16} style={{ color: '#6c63ff', flexShrink: 0 }} />
+              <div className="surface-card" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px' }}>
+                <MapPin size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Location</div>
                   <div style={{ fontSize: '14px', color: 'var(--text-1)', fontWeight: 500 }}>India · Available Remote</div>
@@ -92,8 +88,9 @@ export default function Contact() {
                 <motion.a key={label} href={href} target="_blank" rel="noopener noreferrer"
                   initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5, ease }}
-                  whileHover={{ x: 5, borderColor: color + '60' }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', textDecoration: 'none', transition: 'border-color 0.2s' }}>
+                  whileHover={{ x: 4, borderColor: 'rgba(184,137,82,0.35)' }}
+                  className="surface-card"
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', borderRadius: '12px', textDecoration: 'none', transition: 'border-color 0.2s' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${color}15`, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Icon size={16} style={{ color }} />
                   </div>
@@ -108,11 +105,11 @@ export default function Contact() {
 
           {/* Right: Form */}
           <SlideRight>
-            <motion.form onSubmit={handleSubmit}
-              style={{ padding: '2rem', borderRadius: '20px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <motion.form onSubmit={handleSubmit} className="surface-card"
+              style={{ padding: '2rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                <MessageSquare size={18} style={{ color: '#6c63ff' }} />
-                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>Send a Message</span>
+                <MessageSquare size={18} style={{ color: 'var(--accent)' }} />
+                <span style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>Send a Message</span>
               </div>
 
               <div>
@@ -137,7 +134,7 @@ export default function Contact() {
               )}
 
               <motion.button type="submit" disabled={sending || sent}
-                whileHover={!sending && !sent ? { scale: 1.03, boxShadow: '0 0 28px rgba(108,99,255,0.45)' } : {}}
+                whileHover={!sending && !sent ? { scale: 1.03, boxShadow: '0 0 28px rgba(184,137,82,0.45)' } : {}}
                 whileTap={{ scale: 0.97 }} className="btn-primary"
                 style={{ width: '100%', justifyContent: 'center', gap: '8px', padding: '12px', fontSize: '14px', display: 'inline-flex', alignItems: 'center' }}>
                 {sent ? (

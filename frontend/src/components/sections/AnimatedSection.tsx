@@ -144,14 +144,8 @@ export function SlideRight({
 export function SectionLabel({ text }: { text: string }) {
   return (
     <FadeUp>
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: '8px',
-        padding: '5px 14px', borderRadius: '9999px', marginBottom: '12px',
-        background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.25)',
-        color: '#a8a8ff', fontSize: '11px', fontFamily: 'monospace',
-        letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-      }}>
-        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#6c63ff', display: 'inline-block' }} />
+      <div className="section-label">
+        <span style={{ width: '20px', height: '1px', background: 'var(--accent)', display: 'inline-block' }} />
         {text}
       </div>
     </FadeUp>

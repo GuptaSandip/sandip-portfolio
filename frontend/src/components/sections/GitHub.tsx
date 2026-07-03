@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Github, ExternalLink, Star, GitFork, Code2 } from 'lucide-react'
 import { FadeUp, StaggerContainer, StaggerItem, SectionLabel } from './AnimatedSection'
+import { getPinnedRepos } from '@/lib/supabase'
+import type { PinnedRepo } from '@/types'
 
 const PLATFORMS = [
 
   {
     name: 'LinkedIn',
-    handle: 'sandip-gupta11',
-    href: 'https://www.linkedin.com/in/sandip-gupta11/',
+    handle: 'sandipgupta-ai',
+    href: 'https://www.linkedin.com/in/sandipgupta-ai/',
     color: '#0077b5',
     desc: 'Professional network, articles & updates',
     icon: '💼',
@@ -18,7 +20,7 @@ const PLATFORMS = [
     name: 'GitHub',
     handle: '@GuptaSandip',
     href: 'https://github.com/GuptaSandip',
-    color: '#6c63ff',
+    color: 'var(--accent)',
     desc: 'Open source projects, AI tools, ML experiments',
     icon: '🐙',
     stat: '20+ repos',
@@ -66,7 +68,7 @@ function ContribGrid() {
     })
   )
 
-  const colors = ['var(--bd)', 'rgba(108,99,255,0.25)', 'rgba(108,99,255,0.5)', 'rgba(108,99,255,0.75)', '#6c63ff']
+  const colors = ['var(--bd)', 'rgba(184,137,82,0.2)', 'rgba(184,137,82,0.4)', 'rgba(184,137,82,0.65)', 'var(--accent)']
 
   return (
     <div>
@@ -99,26 +101,35 @@ function ContribGrid() {
   )
 }
 
-// Fake pinned repos
-const PINNED = [
-  { name: 'agentic-portfolio-bot', desc: 'AI chatbot for portfolio using Groq + RAG + FastAPI', stars: 12, forks: 3, lang: 'Python', langColor: '#3572A5' },
-  { name: 'llm-document-qa', desc: 'LlamaIndex-powered document Q&A with streaming', stars: 8, forks: 2, lang: 'Python', langColor: '#3572A5' },
-  { name: 'multi-agent-orchestrator', desc: 'LangChain multi-agent system with tool use', stars: 15, forks: 5, lang: 'Python', langColor: '#3572A5' },
-  { name: 'sandip-portfolio', desc: 'My personal portfolio — React + FastAPI + Supabase', stars: 6, forks: 1, lang: 'TypeScript', langColor: '#3178c6' },
+// Fallback if DB table not yet created
+const PINNED_FALLBACK: PinnedRepo[] = [
+  { id: '1', name: 'agentic-portfolio-bot', description: 'AI chatbot for portfolio using Groq + RAG + FastAPI', repo_url: 'https://github.com/GuptaSandip/agentic-portfolio-bot', stars: 12, forks: 3, language: 'Python', lang_color: '#3572A5', display_order: 1, is_visible: true },
+  { id: '2', name: 'llm-document-qa', description: 'LlamaIndex-powered document Q&A with streaming', repo_url: 'https://github.com/GuptaSandip/llm-document-qa', stars: 8, forks: 2, language: 'Python', lang_color: '#3572A5', display_order: 2, is_visible: true },
+  { id: '3', name: 'multi-agent-orchestrator', description: 'LangChain multi-agent system with tool use', repo_url: 'https://github.com/GuptaSandip/multi-agent-orchestrator', stars: 15, forks: 5, language: 'Python', lang_color: '#3572A5', display_order: 3, is_visible: true },
+  { id: '4', name: 'sandip-portfolio', description: 'Personal portfolio — React + FastAPI + Supabase', repo_url: 'https://github.com/GuptaSandip/sandip-portfolio', stars: 6, forks: 1, language: 'TypeScript', lang_color: '#3178c6', display_order: 4, is_visible: true },
 ]
 
 const ease = [0.21, 0.47, 0.32, 0.98] as const
 
 export default function GitHub() {
+  const [pinned, setPinned] = useState<PinnedRepo[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getPinnedRepos()
+      .then(data => setPinned(data.length > 0 ? data : PINNED_FALLBACK))
+      .catch(() => setPinned(PINNED_FALLBACK))
+      .finally(() => setLoading(false))
+  }, [])
   return (
-    <section id="platforms" style={{ padding: '6rem 1.5rem' }}>
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="platforms" style={{ padding: '7rem 1.75rem' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <SectionLabel text="Platforms" />
           <FadeUp delay={0.05}>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
               Find Me <span className="gradient-text">Everywhere</span>
             </h2>
           </FadeUp>
@@ -146,7 +157,7 @@ export default function GitHub() {
                     <ExternalLink size={14} style={{ color: 'var(--text-3)' }} />
                   </div>
 
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '3px' }}>{p.name}</div>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '3px' }}>{p.name}</div>
                   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: p.color, marginBottom: '8px' }}>{p.handle}</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.6, marginBottom: '12px' }}>{p.desc}</div>
                   <div style={{ fontSize: '11px', fontFamily: 'monospace', padding: '3px 10px', borderRadius: '6px', background: `${p.color}12`, color: p.color, border: `1px solid ${p.color}25`, display: 'inline-block' }}>
@@ -163,16 +174,14 @@ export default function GitHub() {
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     height: '100%',
-
                     padding: '1.5rem',
-                    borderRadius: '16px',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--bd)',
+                    borderRadius: '12px',
                     textDecoration: 'none',
-                    transition: 'border-color 0.25s, box-shadow 0.25s',
+                    transition: 'border-color 0.25s, transform 0.25s',
                     position: 'relative',
                     overflow: 'hidden'
                   }}
+                  className="surface-card"
                 >
                   <div
                     style={{
@@ -193,7 +202,7 @@ export default function GitHub() {
                       <ExternalLink size={14} style={{ color: 'var(--text-3)' }} />
                     </div>
 
-                    <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '3px' }}>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)', marginBottom: '3px' }}>
                       {p.name}
                     </div>
 
@@ -235,16 +244,16 @@ export default function GitHub() {
 
         {/* GitHub contribution graph */}
         <FadeUp>
-          <div style={{ padding: '2rem', borderRadius: '20px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', marginBottom: '2rem' }}>
+          <div className="surface-card" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Github size={20} style={{ color: '#6c63ff' }} />
-                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>GitHub Activity</span>
+                <Github size={20} style={{ color: 'var(--accent)' }} />
+                <span style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>GitHub Activity</span>
               </div>
               <motion.a
                 href="https://github.com/GuptaSandip" target="_blank" rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontFamily: 'monospace', color: '#6c63ff', textDecoration: 'none' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent)', textDecoration: 'none' }}
               >
                 @GuptaSandip <ExternalLink size={11} />
               </motion.a>
@@ -256,39 +265,46 @@ export default function GitHub() {
         {/* Pinned repos */}
         <FadeUp delay={0.1}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-            <Code2 size={16} style={{ color: '#6c63ff' }} />
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>Pinned Repositories</span>
+            <Code2 size={16} style={{ color: 'var(--accent)' }} />
+            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: '16px', color: 'var(--text-1)' }}>Pinned Repositories</span>
           </div>
         </FadeUp>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-          {PINNED.map((repo, i) => (
+          {loading ? (
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+              <div className="spinner" />
+            </div>
+          ) : pinned.map((repo, i) => (
             <motion.a
-              key={repo.name}
-              href={`https://github.com/GuptaSandip/${repo.name}`}
+              key={repo.id || repo.name}
+              href={repo.repo_url}
               target="_blank" rel="noopener noreferrer"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5, ease }}
-              whileHover={{ y: -3, borderColor: 'rgba(108,99,255,0.4)' }}
-              style={{ display: 'block', padding: '1.25rem', borderRadius: '14px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', textDecoration: 'none', transition: 'border-color 0.2s' }}
+              whileHover={{ y: -3, borderColor: 'rgba(184,137,82,0.35)' }}
+              className="surface-card"
+              style={{ display: 'block', padding: '1.25rem', borderRadius: '12px', textDecoration: 'none', transition: 'border-color 0.2s' }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6c63ff', boxShadow: '0 0 8px rgba(108,99,255,0.5)' }} />
-                  <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '13px', color: '#6c63ff' }}>{repo.name}</span>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 8px rgba(184,137,82,0.5)' }} />
+                  <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '13px', color: 'var(--accent)' }}>{repo.name}</span>
                 </div>
                 <ExternalLink size={12} style={{ color: 'var(--text-3)' }} />
               </div>
 
-              <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.6, marginBottom: '12px' }}>{repo.desc}</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.6, marginBottom: '12px' }}>{repo.description}</p>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: repo.langColor, display: 'inline-block' }} />
-                  {repo.lang}
-                </span>
+                {repo.language && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: repo.lang_color || '#3572A5', display: 'inline-block' }} />
+                    {repo.language}
+                  </span>
+                )}
                 <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)' }}>
                   <Star size={11} /> {repo.stars}
                 </span>

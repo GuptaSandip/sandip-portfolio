@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Bio, TechItem, Project, Accomplishment, Course, Experience, ResumeOverview } from '@/types'
+import type { Bio, TechItem, Project, Accomplishment, Course, Experience, ResumeOverview, PinnedRepo } from '@/types'
 
 const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string
 const supabaseAnon = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -67,4 +67,13 @@ export async function getResumeOverview(): Promise<ResumeOverview[]> {
     .select('*')
     .order('display_order')
   return (data ?? []) as ResumeOverview[]
+}
+
+export async function getPinnedRepos(): Promise<PinnedRepo[]> {
+  const { data } = await supabase
+    .from('pinned_repos')
+    .select('*')
+    .eq('is_visible', true)
+    .order('display_order')
+  return (data ?? []) as PinnedRepo[]
 }

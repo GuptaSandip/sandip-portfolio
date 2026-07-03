@@ -161,7 +161,7 @@ export default function BioEditor() {
           <p style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Social Links</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <Field label="GitHub URL"        field="github_url"      placeholder="https://github.com/GuptaSandip" />
-            <Field label="LinkedIn URL"      field="linkedin_url"    placeholder="https://linkedin.com/in/sandip-gupta11/" />
+            <Field label="LinkedIn URL"      field="linkedin_url"    placeholder="https://www.linkedin.com/in/sandipgupta-ai/" />
             <Field label="Twitter / X URL"   field="twitter_url"     placeholder="https://x.com/guptasandip11" />
             <Field label="HuggingFace URL"   field="huggingface_url" placeholder="https://huggingface.co/guptasandip" />
             <Field label="HackerRank URL"    field="hackerrank_url"  placeholder="https://hackerrank.com/profile/sandip_gupta_111" />

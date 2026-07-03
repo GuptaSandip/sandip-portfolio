@@ -5,12 +5,12 @@ import { getTechStack } from '@/lib/supabase'
 import type { TechItem } from '@/types'
 
 const CATS = [
-  { key: 'all',      label: 'All',       color: '#6c63ff' },
-  { key: 'ai_ml',    label: 'AI / ML',   color: '#6c63ff' },
-  { key: 'language', label: 'Languages', color: '#00d4ff' },
-  { key: 'framework',label: 'Frameworks',color: '#34d399' },
-  { key: 'tool',     label: 'Tools',     color: '#fbbf24' },
-  { key: 'database', label: 'Databases', color: '#f472b6' },
+  { key: 'all',       label: 'All',       color: 'var(--accent)' },
+  { key: 'ai_ml',     label: 'AI / ML',   color: '#9A7350' },
+  { key: 'language',  label: 'Languages', color: '#7A8B6E' },
+  { key: 'framework', label: 'Frameworks',color: '#8B7355' },
+  { key: 'tool',      label: 'Tools',     color: '#A08060' },
+  { key: 'database',  label: 'Databases', color: '#6B7B8A' },
 ]
 
 function LevelDots({ level, color }: { level: number; color: string }) {
@@ -43,20 +43,20 @@ export default function TechStack() {
     : techs.filter(t => t.category === active)
 
   if (loading) return (
-    <section id="stack" style={{ padding: '6rem 1.5rem', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #6c63ff', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+    <section id="stack" style={{ padding: '7rem 1.75rem', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--accent)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
     </section>
   )
 
   return (
-    <section id="stack" style={{ padding: '6rem 1.5rem', position: 'relative' }}>
-      <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
+    <section id="stack" style={{ padding: '7rem 1.75rem', position: 'relative' }}>
+      <div style={{ maxWidth: '68rem', margin: '0 auto' }}>
 
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <SectionLabel text="Tech Stack" />
 
           <FadeUp delay={0.05}>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-1)', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
               Tools &amp; <span className="gradient-text">Technologies</span>
             </h2>
           </FadeUp>
@@ -104,8 +104,9 @@ export default function TechStack() {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.04, duration: 0.35 }}
-                  whileHover={{ y: -6, borderColor: catMeta.color + '60', boxShadow: `0 8px 24px ${catMeta.color}20` }}
-                  style={{ padding: '1.1rem', borderRadius: '14px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', cursor: 'default', transition: 'border-color 0.2s' }}>
+                  whileHover={{ y: -4, borderColor: catMeta.color + '60' }}
+                  className="surface-card"
+                  style={{ padding: '1.25rem', borderRadius: '12px', cursor: 'default', transition: 'border-color 0.2s, transform 0.2s' }}>
 
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-1)', fontFamily: 'DM Sans, sans-serif', marginBottom: '2px' }}>{tech.name}</div>
                   <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'capitalize' }}>{tech.category.replace('_', '/')}</div>
@@ -124,7 +125,7 @@ export default function TechStack() {
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <div style={{ display: 'flex', gap: '2px' }}>
                   {[1,2,3,4,5].map(d => (
-                    <div key={d} style={{ width: '5px', height: '5px', borderRadius: '50%', background: d <= i + 1 ? '#6c63ff' : 'var(--bd)' }} />
+                    <div key={d} style={{ width: '5px', height: '5px', borderRadius: '50%', background: d <= i + 1 ? 'var(--accent)' : 'var(--bd)' }} />
                   ))}
                 </div>
                 <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)' }}>{label}</span>

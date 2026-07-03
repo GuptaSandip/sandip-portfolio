@@ -16,10 +16,10 @@ export default function App() {
           position="top-right"
           toastOptions={{
             style: {
-              background: 'var(--bg-surface, #0d0d1c)',
-              color: 'var(--text-1, #eaeaf8)',
-              border: '1px solid var(--bd, #1e1e3f)',
-              fontFamily: '"DM Sans", sans-serif',
+              background: 'var(--bg-surface, #E8E0D0)',
+              color: 'var(--text-card-1, #161616)',
+              border: '1px solid var(--bd, rgba(0,0,0,0.1))',
+              fontFamily: '"Inter", sans-serif',
               fontSize: '13px',
             },
           }}

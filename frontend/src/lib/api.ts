@@ -285,5 +285,18 @@ export const adminApi = {
 
   deleteContact: (id: string) =>
     af(`/api/admin/contacts/${id}`, { method: 'DELETE' }),
+
+  // Pinned GitHub Repos
+  getPinnedRepos: () =>
+    af('/api/admin/pinned-repos'),
+
+  createPinnedRepo: (data: object) =>
+    af('/api/admin/pinned-repos', { method: 'POST', body: JSON.stringify(data) }),
+
+  updatePinnedRepo: (id: string, data: object) =>
+    af(`/api/admin/pinned-repos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  deletePinnedRepo: (id: string) =>
+    af(`/api/admin/pinned-repos/${id}`, { method: 'DELETE' }),
 }
 

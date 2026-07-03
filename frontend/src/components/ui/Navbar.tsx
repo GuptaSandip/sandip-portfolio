@@ -1,26 +1,36 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, Sun, Moon, Terminal } from 'lucide-react'
-import { clsx } from 'clsx'
+import { Menu, X, Sun, Moon, ChevronDown } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 
+const LINKEDIN = 'https://www.linkedin.com/in/sandipgupta-ai/'
+
 const NAV_LINKS = [
-  { label: 'About',    href: 'about'},
-  { label: 'Stack',    href: 'stack'},
-  { label: 'Projects', href: 'projects'},
-  { label: 'Achievements', href: 'achievements'},
-  { label: 'Contact',  href: 'contact'},
+  { label: 'Home',       href: 'hero' },
+  { label: 'About',      href: 'about' },
+  { label: 'Projects',   href: 'projects' },
+  { label: 'Experience', href: 'about' },
+  { label: 'Contact',    href: 'contact' },
 ]
 
 export default function Navbar() {
   const [open, setOpen]         = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [active, setActive]     = useState('hero')
   const { theme, toggle }       = useTheme()
-  const isDark                  = theme === 'dark'
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
+    const sections = NAV_LINKS.map(l => l.href)
+    const fn = () => {
+      const y = window.scrollY + 140
+      let current = 'hero'
+      for (const id of sections) {
+        const el = document.getElementById(id)
+        if (el && el.offsetTop <= y) current = id
+      }
+      setActive(current)
+    }
     window.addEventListener('scroll', fn, { passive: true })
+    fn()
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
@@ -33,125 +43,84 @@ export default function Navbar() {
 
   return (
     <>
-      <nav
-        className={clsx(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          scrolled ? 'nav-bg' : 'bg-transparent'
-        )}
-      >
-        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{ background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)' }}
-            >
-              <Terminal size={15} className="text-primary-400" />
+      <header className="nav-pill-wrapper">
+        <nav className="nav-pill">
+          {/* Brand */}
+          <Link to="/" className="nav-brand" onClick={e => { e.preventDefault(); scrollTo('hero') }}>
+            <img src="/logo-sg.png" alt="SG" className="nav-logo" />
+            <div className="nav-brand-text">
+              <span className="nav-name">SANDIP GUPTA</span>
+              <span className="nav-title">AI Engineer<span className="nav-dot">·</span></span>
             </div>
-            <span className="font-display font-bold text-sm tracking-wide" style={{ color: 'var(--text-1)' }}>
-              sandip<span className="text-primary-400">.</span>dev
-            </span>
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop links */}
+          <div className="nav-links hidden lg:flex">
             {NAV_LINKS.map(link => (
               <button
                 key={link.label}
                 onClick={() => scrollTo(link.href)}
-                className="px-3.5 py-1.5 text-sm font-sans rounded-lg transition-all duration-150"
-                style={{ color: 'var(--text-2)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-1)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-2)')}
+                className={`nav-link${active === link.href ? ' nav-link--active' : ''}`}
               >
                 {link.label}
+                {active === link.href && <span className="nav-link-underline" />}
               </button>
             ))}
           </div>
 
-          {/* Right side */}
-          <div className="hidden md:flex items-center gap-3">
-
-            {/* Day / Night toggle */}
-            <button
-              onClick={toggle}
-              aria-label="Toggle theme"
-              className={clsx(
-                'relative w-14 h-7 rounded-full transition-all duration-300 flex items-center',
-                isDark ? 'bg-primary-400/20 border border-primary-400/40' : 'bg-amber-100 border border-amber-300'
-              )}
-            >
-              <span
-                className={clsx(
-                  'absolute w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300',
-                  isDark
-                    ? 'left-1 bg-primary-400 shadow-glow-sm'
-                    : 'left-[calc(100%-1.5rem)] bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                )}
-              >
-                {isDark
-                  ? <Moon size={11} className="text-white" />
-                  : <Sun  size={11} className="text-white" />
-                }
-              </span>
-            </button>
-
-            <button
-              onClick={() => scrollTo('contact')}
-              className="btn-primary text-sm py-2 px-5 rounded-xl"
-            >
-              Let's Talk →
-            </button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <div className="md:hidden flex items-center gap-2">
-            <button
-              onClick={toggle}
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--text-2)' }}
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          {/* Right controls */}
+          <div className="nav-actions">
+            <button onClick={toggle} className="nav-theme-btn hidden md:flex" aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
             <button
-              className="p-2 transition-colors"
-              style={{ color: 'var(--text-2)' }}
+              className="nav-menu-btn lg:hidden"
               onClick={() => setOpen(o => !o)}
               aria-label="Toggle menu"
             >
-              {open ? <X size={20} /> : <Menu size={20} />}
+              {open ? <X size={16} color="#E8E0D0" /> : <Menu size={16} color="#E8E0D0" />}
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
-      {/* Mobile menu */}
+      {/* Mobile drawer */}
       {open && (
-        <div
-          className="fixed inset-0 z-40 flex flex-col pt-20 px-6"
-          style={{ background: 'var(--bg)' }}
-        >
-          <div className="flex flex-col gap-1">
+        <div className="nav-mobile-overlay" onClick={() => setOpen(false)}>
+          <div className="nav-mobile-panel surface-card" onClick={e => e.stopPropagation()}>
             {NAV_LINKS.map(link => (
               <button
                 key={link.label}
                 onClick={() => scrollTo(link.href)}
-                className="text-left px-4 py-4 text-lg font-display font-semibold transition-colors"
-                style={{ color: 'var(--text-2)', borderBottom: '1px solid var(--bd)' }}
+                className={`nav-mobile-link${active === link.href ? ' nav-mobile-link--active' : ''}`}
               >
                 {link.label}
               </button>
             ))}
-          </div>
-          <div className="mt-6">
-            <button onClick={() => scrollTo('contact')} className="btn-primary w-full">
-              Let's Talk →
+            <button onClick={toggle} className="nav-mobile-theme">
+              {theme === 'dark' ? <><Sun size={15} /> Light mode</> : <><Moon size={15} /> Dark mode</>}
             </button>
+            <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="nav-mobile-link" style={{ textDecoration: 'none' }}>
+              LinkedIn
+            </a>
           </div>
         </div>
       )}
     </>
+  )
+}
+
+export function ScrollHint() {
+  function scrollToAbout() {
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  return (
+    <button className="scroll-hint" onClick={scrollToAbout} aria-label="Scroll to explore">
+      <span className="scroll-hint-label">Scroll</span>
+      <span className="scroll-hint-arrow">
+        <ChevronDown size={18} strokeWidth={1.5} />
+      </span>
+    </button>
   )
 }

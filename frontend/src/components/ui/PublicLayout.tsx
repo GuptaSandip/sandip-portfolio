@@ -5,12 +5,14 @@ import ChatWidget from '@/components/chatbot/ChatWidget'
 
 export default function PublicLayout() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
-      <main style={{ flex: 1, paddingTop: '64px' }}>
-        <Outlet />
-      </main>
-      <Footer />
+    <div className="site-outer">
+      <div className="site-frame">
+        <Navbar />
+        <main style={{ flex: 1, paddingTop: '88px' }}>
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
       <ChatWidget />
     </div>
   )

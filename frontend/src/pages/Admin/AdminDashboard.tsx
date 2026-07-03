@@ -79,7 +79,7 @@ import { useAuthStore } from '@/store'
 import {
   LayoutDashboard, User, Code2, FolderKanban, Trophy,
   BookOpen, FileText, MessageSquare, LogOut, Terminal,
-  Users, HelpCircle, ChevronRight, Briefcase,
+  Users, HelpCircle, ChevronRight, Briefcase, Github,
 } from 'lucide-react'
 import BioEditor          from '@/components/admin/editors/BioEditor'
 import ProjectsEditor     from '@/components/admin/editors/ProjectsEditor'
@@ -94,6 +94,7 @@ import ExperienceEditor from '@/components/admin/editors/ExperienceEditor'
 import ResumeOverviewEditor from '@/components/admin/editors/ResumeOverviewEditor'
 import ChatbotKnowledgeEditor from '@/components/admin/editors/ChatbotKnowledgeEditor'
 import ContactMessagesViewer from '@/components/admin/editors/ContactMessagesViewer'
+import PinnedReposEditor from '@/components/admin/editors/PinnedReposEditor'
 
 const MENU = [
   { icon: LayoutDashboard, label: 'Overview',     path: '',             color: '#6c63ff' },
@@ -101,6 +102,7 @@ const MENU = [
   { icon: Briefcase,       label: 'Experience' ,  path: 'experience' ,  color: '#f472b6'},
   { icon: Code2,           label: 'Tech Stack',   path: 'tech',         color: '#34d399' },
   { icon: FolderKanban,    label: 'Projects',     path: 'projects',     color: '#fbbf24' },
+  { icon: Github,          label: 'Pinned Repos', path: 'pinned-repos', color: '#6c63ff' },
   { icon: Trophy,          label: 'Achievements', path: 'achievements', color: '#f472b6' },
   { icon: BookOpen,        label: 'Courses',      path: 'courses',      color: '#a78bfa' },
   { icon: FileText,        label: 'Resume',       path: 'resume',       color: '#6c63ff' },
@@ -174,6 +176,7 @@ export default function AdminDashboard() {
               <Route path="/experience"   element={<ExperienceEditor />} />
               <Route path="/tech"         element={<TechEditor />} />
               <Route path="/projects"     element={<ProjectsEditor />} />
+              <Route path="/pinned-repos" element={<PinnedReposEditor />} />
               <Route path="/achievements" element={<AchievementsEditor />} />
               <Route path="/courses"      element={<CoursesEditor />} />
               <Route path="/resume"       element={<ResumeUploader />} />
