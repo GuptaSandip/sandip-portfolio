@@ -22,4 +22,4 @@ frontend/build/
 Thumbs.db
 
 # Pinecone/Index cache if any
-*.index
+*.indexplan.txt
