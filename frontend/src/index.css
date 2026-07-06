@@ -593,6 +593,18 @@
   display: flex;
   min-height: 100vh;
   background: var(--bg);
+  color: var(--text-card-1);
+  --text-1: var(--text-card-1);
+  --text-2: var(--text-card-2);
+  --text-3: var(--text-card-3);
+}
+
+.admin-shell .surface-card,
+.admin-shell .card,
+.admin-shell .bento-card,
+.admin-shell [style*="background: var(--bg-surface)"],
+.admin-shell [style*="background: var(--bg-panel)"] {
+  color: var(--text-card-1);
 }
 
 .admin-mobile-bar {

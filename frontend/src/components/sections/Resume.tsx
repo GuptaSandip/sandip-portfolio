@@ -69,16 +69,21 @@ function ResumeMockup() {
 
 export default function Resume() {
   const [resumeUrl, setResumeUrl]   = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [overview, setOverview]     = useState<ResumeOverview[]>([])
   const [downloading, setDownloading] = useState(false)
   const [loading, setLoading]         = useState(true)
 
   useEffect(() => {
     Promise.all([
-      supabase.from('bio').select('resume_url').eq('id', 1).single(),
+      supabase.from('bio').select('resume_url, updated_at').eq('id', 1).single(),
       getResumeOverview()
     ]).then(([bioRes, ovRes]) => {
       if (bioRes.data?.resume_url) setResumeUrl(bioRes.data.resume_url)
+      if (bioRes.data?.updated_at) {
+        const date = new Date(bioRes.data.updated_at)
+        setLastUpdated(date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }))
+      }
       setOverview(ovRes)
     }).finally(() => setLoading(false))
   }, [])
@@ -162,7 +167,7 @@ export default function Resume() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-3)' }}>
                 <Eye size={12} />
-                <span>Last updated: May 2025</span>
+                <span>Last updated: {lastUpdated ?? 'May 2025'}</span>
               </div>
             </div>
           </SlideLeft>

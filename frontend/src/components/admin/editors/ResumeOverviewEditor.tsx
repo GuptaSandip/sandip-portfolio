@@ -20,25 +20,40 @@ export default function ResumeOverviewEditor() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    adminApi.getResumeOverview()
-      .then(setItems)
-      .catch(() => toast.error('Load failed'))
-      .finally(() => setLoading(false))
+    loadItems()
   }, [])
 
+  async function loadItems() {
+    setLoading(true)
+    try {
+      const data = await adminApi.getResumeOverview()
+      setItems(data)
+    } catch {
+      toast.error('Load failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function save() {
-    if (!editing.label) {
+    if (!editing?.label) {
       toast.error('Label is required')
       return
     }
     setSaving(true)
+    const payload = {
+      category: editing.category,
+      label: editing.label,
+      sub: editing.sub,
+      display_order: Number(editing.display_order ?? 0),
+    }
     try {
       if (editing.id) {
-        const u = await adminApi.updateResumeOverview(editing.id, editing)
+        const u = await adminApi.updateResumeOverview(editing.id, payload)
         setItems(p => p.map(x => x.id === editing.id ? u : x))
         toast.success('Updated!')
       } else {
-        const c = await adminApi.createResumeOverview(editing)
+        const c = await adminApi.createResumeOverview(payload)
         setItems(p => [...p, c])
         toast.success('Created!')
       }
@@ -134,10 +149,10 @@ export default function ResumeOverviewEditor() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {catItems.map(item => (
                   <motion.div key={item.id} whileHover={{ borderColor: 'rgba(108,99,255,0.35)' }}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s' }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s', color: 'var(--text-card-1)' }}>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-1)' }}>{item.label}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-3)', fontFamily: 'monospace' }}>{item.sub}</div>
+                      <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-card-1)' }}>{item.label}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-card-3)', fontFamily: 'monospace' }}>{item.sub}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <motion.button onClick={() => setEditing({ ...item })} whileHover={{ scale: 1.1 }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6c63ff', padding: '4px', fontSize: '16px' }}>✏️</motion.button>

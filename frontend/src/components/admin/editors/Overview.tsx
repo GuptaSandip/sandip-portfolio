@@ -6,14 +6,14 @@ import { FolderKanban, MessageSquare, Users, BookOpen, Trophy, ExternalLink } fr
 function StatCard({ icon: Icon, label, value, color, sub }: { icon: any; label: string; value: number | string; color: string; sub?: string }) {
   return (
     <motion.div whileHover={{ y: -3, borderColor: color + '50' }}
-      style={{ padding: '1.5rem', borderRadius: '16px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s' }}>
+      style={{ padding: '1.5rem', borderRadius: '16px', background: 'var(--bg-surface)', border: '1px solid var(--bd)', transition: 'border-color 0.2s', color: 'var(--text-card-1)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${color}15`, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon size={16} style={{ color }} />
         </div>
         <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
       </div>
-      <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '2rem', color: 'var(--text-1)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '2rem', color: 'var(--text-card-1)', lineHeight: 1 }}>{value}</div>
       {sub && <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-3)', marginTop: '6px' }}>{sub}</div>}
     </motion.div>
   )
@@ -23,6 +23,10 @@ export default function Overview() {
   const [stats, setStats] = useState({ projects: 0, leads: 0, enrollments: 0, courses: 0, achievements: 0, unread: 0 })
 
   useEffect(() => {
+    function count(result: PromiseSettledResult<any>) {
+      return result.status === 'fulfilled' && Array.isArray(result.value) ? result.value.length : 0
+    }
+
     Promise.allSettled([
       adminApi.getProjects(),
       adminApi.getLeads(),
@@ -31,12 +35,12 @@ export default function Overview() {
       adminApi.getAccomplishments(),
     ]).then(([p, l, e, c, a]) => {
       setStats({
-        projects:     p.status === 'fulfilled' ? p.value.length : 0,
-        leads:        l.status === 'fulfilled' ? l.value.length : 0,
-        enrollments:  e.status === 'fulfilled' ? e.value.length : 0,
-        courses:      c.status === 'fulfilled' ? c.value.length : 0,
-        achievements: a.status === 'fulfilled' ? a.value.length : 0,
-        unread:       l.status === 'fulfilled' ? l.value.filter((x: any) => !x.is_read).length : 0,
+        projects:     count(p),
+        leads:        count(l),
+        enrollments:  count(e),
+        courses:      count(c),
+        achievements: count(a),
+        unread:       l.status === 'fulfilled' && Array.isArray(l.value) ? l.value.filter((x: any) => !x.is_read).length : 0,
       })
     })
   }, [])
