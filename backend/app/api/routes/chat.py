@@ -54,9 +54,35 @@ async def build_system_prompt() -> str:
         exp  = sb.table("experience").select("*").order("end_date", desc=True).limit(10).execute().data or []
 
         try:
-            kb = sb.table("chatbot_knowledge").select("content").eq("is_active", True).execute().data or []
-            kb_text = "\n".join(f"- {k['content']}" for k in kb)
-        except Exception:
+            # Fetch all active knowledge (both manual and auto-generated from all portfolio pages)
+            kb = sb.table("chatbot_knowledge").select("*").eq("is_active", True).execute().data or []
+            
+            # Format knowledge entries: Q&A or content, grouped by category
+            kb_by_cat = {}
+            for k in kb:
+                cat = k.get("category", "general").upper()
+                if cat not in kb_by_cat:
+                    kb_by_cat[cat] = []
+                
+                if k.get("question") and k.get("answer"):
+                    # Q&A format
+                    kb_by_cat[cat].append(f"Q: {k['question']}\nA: {k['answer']}")
+                else:
+                    # Content format (fallback for manual entries without Q&A)
+                    content = k.get("content") or k.get("answer") or k.get("title", "")
+                    if content:
+                        kb_by_cat[cat].append(f"• {content}")
+            
+            # Build formatted knowledge base
+            kb_entries = []
+            for cat in sorted(kb_by_cat.keys()):
+                kb_entries.append(f"[{cat}]")
+                kb_entries.extend(kb_by_cat[cat])
+                kb_entries.append("")
+            
+            kb_text = "\n".join(kb_entries) if kb_entries else ""
+        except Exception as e:
+            print(f"[build_system_prompt] Knowledge fetch error: {e}")
             kb_text = ""
 
         project_list = "\n".join(

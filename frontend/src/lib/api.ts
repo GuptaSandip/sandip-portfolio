@@ -1,5 +1,50 @@
 const BASE = import.meta.env.VITE_API_URL ?? ''
 
+// ── Auth Token Management ──────────────────────────────────
+interface TokenPair {
+  access_token: string
+  refresh_token: string
+  token_type: string
+}
+
+function getAccessToken() {
+  return localStorage.getItem('admin_access_token') ?? ''
+}
+
+function getRefreshToken() {
+  return localStorage.getItem('admin_refresh_token') ?? ''
+}
+
+function setTokens(tokens: TokenPair) {
+  localStorage.setItem('admin_access_token', tokens.access_token)
+  localStorage.setItem('admin_refresh_token', tokens.refresh_token)
+}
+
+function clearTokens() {
+  localStorage.removeItem('admin_access_token')
+  localStorage.removeItem('admin_refresh_token')
+}
+
+async function refreshAccessToken() {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) throw new Error('No refresh token')
+  
+  const res = await fetch(`${BASE}/api/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
+  
+  if (!res.ok) {
+    clearTokens()
+    throw new Error('Token refresh failed')
+  }
+  
+  const data = await res.json()
+  setTokens(data)
+  return data.access_token
+}
+
 // ── Auth ───────────────────────────────────────────────────
 export async function adminLogin(username: string, password: string) {
   const form = new FormData()
@@ -10,16 +55,19 @@ export async function adminLogin(username: string, password: string) {
     const err = await res.json().catch(() => ({}))
     throw new Error(err.detail ?? 'Invalid credentials')
   }
-  return res.json() as Promise<{ access_token: string; token_type: string }>
+  const tokens = await res.json()
+  setTokens(tokens)
+  return tokens
 }
 
-function getToken() {
-  return localStorage.getItem('admin_token') ?? ''
+export function adminLogout() {
+  clearTokens()
+  window.location.href = '/admin/login'
 }
 
 function authHeaders(): Record<string, string> {
   return {
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${getAccessToken()}`,
     'Content-Type': 'application/json',
   }
 }
@@ -79,7 +127,7 @@ export async function enroll(payload: {
 }
 
 // ── Core admin fetch helper ────────────────────────────────
-async function af(path: string, opts?: RequestInit) {
+async function af(path: string, opts?: RequestInit, retried = false) {
   const res = await fetch(`${BASE}${path}`, {
     ...opts,
     headers: {
@@ -89,9 +137,23 @@ async function af(path: string, opts?: RequestInit) {
   })
 
   if (res.status === 401) {
-    localStorage.removeItem('admin_token')
-    window.location.href = '/admin/login'
-    throw new Error('Session expired')
+    if (!retried) {
+      try {
+        // Try to refresh the token and retry
+        await refreshAccessToken()
+        return af(path, opts, true)
+      } catch {
+        // Refresh failed, redirect to login
+        clearTokens()
+        window.location.href = '/admin/login'
+        throw new Error('Session expired')
+      }
+    } else {
+      // Already retried, give up
+      clearTokens()
+      window.location.href = '/admin/login'
+      throw new Error('Session expired')
+    }
   }
 
   if (!res.ok) {
@@ -109,17 +171,30 @@ async function af(path: string, opts?: RequestInit) {
 }
 
 // ── File upload helper (no Content-Type — let browser set boundary) ──
-async function afFile(path: string, form: FormData) {
+async function afFile(path: string, form: FormData, retried = false) {
   const res = await fetch(`${BASE}${path}`, {
     method:  'POST',
-    headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getAccessToken()}` },
     body:    form,
   })
+  
   if (res.status === 401) {
-    localStorage.removeItem('admin_token')
-    window.location.href = '/admin/login'
-    throw new Error('Session expired')
+    if (!retried) {
+      try {
+        await refreshAccessToken()
+        return afFile(path, form, true)
+      } catch {
+        clearTokens()
+        window.location.href = '/admin/login'
+        throw new Error('Session expired')
+      }
+    } else {
+      clearTokens()
+      window.location.href = '/admin/login'
+      throw new Error('Session expired')
+    }
   }
+  
   if (!res.ok) {
     let detail = `Upload failed (HTTP ${res.status})`
     try { detail = (await res.json()).detail ?? detail } catch { /* ignore */ }
@@ -278,6 +353,10 @@ export const adminApi = {
 
   deleteKnowledge: (id: string) =>
     af(`/api/admin/knowledge/${id}`, { method: 'DELETE' }),
+  
+  // Generic POST for other admin endpoints
+  post: (path: string, data: object) =>
+    af(path, { method: 'POST', body: JSON.stringify(data) }),
 
   // Contact Messages
   getContacts: () =>

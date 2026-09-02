@@ -92,7 +92,10 @@ async def admin_create_project(data: ProjectCreate):
     result = db().table("projects").insert(data.model_dump()).execute()
     if not result.data:
         raise HTTPException(500, "Create failed")
-    return result.data[0]
+    project = result.data[0]
+    # Auto-generate knowledge entry for this project
+    await auto_sync_project_to_knowledge(project["id"], project)
+    return project
 
 
 @router.put("/projects/{pid}")
@@ -101,7 +104,10 @@ async def admin_update_project(pid: str, data: ProjectUpdate):
     result = db().table("projects").update(payload).eq("id", pid).execute()
     if not result.data:
         raise HTTPException(404, "Project not found")
-    return result.data[0]
+    project = result.data[0]
+    # Auto-sync knowledge entry for this project
+    await auto_sync_project_to_knowledge(pid, project)
+    return project
 
 
 @router.delete("/projects/{pid}")
@@ -427,6 +433,254 @@ async def admin_update_knowledge(kid: str, data: KnowledgeUpdate):
 async def admin_delete_knowledge(kid: str):
     db().table("chatbot_knowledge").delete().eq("id", kid).execute()
     return {"deleted": True}
+
+
+# ── Auto-Sync Knowledge from Projects ──────────────────────────
+async def auto_sync_project_to_knowledge(project_id: str, project_data: dict):
+    """Auto-generate knowledge entry from a project when it's created/updated."""
+    try:
+        # Check if auto-knowledge already exists for this project
+        existing = db().table("chatbot_knowledge").select("id").eq("project_id", project_id).execute().data
+        
+        # Generate knowledge answer from project details
+        tech_str = ", ".join(project_data.get("tech_tags", [])) if project_data.get("tech_tags") else "various technologies"
+        knowledge_answer = f"""**{project_data.get('title', 'Project')}**
+
+{project_data.get('description', 'A project by Sandip')}
+
+**Technologies Used:** {tech_str}"""
+        
+        knowledge_entry = {
+            "title": f"Project: {project_data.get('title', 'Untitled')}",
+            "question": "Tell me about this project",
+            "answer": knowledge_answer,
+            "content": project_data.get('description', ''),
+            "category": "projects",
+            "project_id": project_id,
+            "source_type": "auto",
+            "is_active": project_data.get('is_visible', True),
+        }
+        
+        if existing:
+            # Update existing auto-generated entry
+            db().table("chatbot_knowledge").update(knowledge_entry).eq("project_id", project_id).execute()
+        else:
+            # Create new auto-generated entry
+            db().table("chatbot_knowledge").insert(knowledge_entry).execute()
+    except Exception as e:
+        print(f"[auto_sync_project_to_knowledge] Error: {e}")
+        # Don't fail the project operation if knowledge sync fails
+
+
+# ── Smart Multi-Page Auto-Sync (comprehensive knowledge generation) ────
+async def smart_sync_all_knowledge():
+    """Generate comprehensive knowledge from ALL portfolio pages."""
+    try:
+        sb = db()
+        synced = 0
+        
+        # 1. Bio/About page knowledge
+        print("[smart_sync] Syncing bio/about page...")
+        try:
+            bio = sb.table("bio").select("*").eq("id", 1).single().execute().data or {}
+            if bio:
+                bio_knowledge = {
+                    "title": f"About {bio.get('name', 'Sandip')}",
+                    "question": f"Tell me about {bio.get('name', 'Sandip')}",
+                    "answer": bio.get("about", ""),
+                    "content": f"{bio.get('about', '')} | Location: {bio.get('location', '')} | Open to work: {bio.get('is_open_to_work', True)}",
+                    "category": "about",
+                    "source_type": "auto",
+                    "is_active": True,
+                }
+                
+                # Check if exists
+                existing_bio = sb.table("chatbot_knowledge").select("id").eq("category", "about").eq("source_type", "auto").execute().data
+                if existing_bio:
+                    sb.table("chatbot_knowledge").update(bio_knowledge).eq("id", existing_bio[0]["id"]).execute()
+                else:
+                    sb.table("chatbot_knowledge").insert(bio_knowledge).execute()
+                synced += 1
+                print("[smart_sync] ✓ Bio synced")
+        except Exception as e:
+            print(f"[smart_sync] Bio error: {e}")
+        
+        # 2. Experience knowledge
+        print("[smart_sync] Syncing experience...")
+        try:
+            experiences = sb.table("experience").select("*").order("end_date", desc=True).limit(5).execute().data or []
+            if experiences:
+                exp_text = "\n".join(
+                    f"• {e.get('title', 'Position')}: {e.get('company', '')} ({e.get('duration', '')})"
+                    for e in experiences
+                )
+                exp_knowledge = {
+                    "title": "Professional Experience",
+                    "question": "What is your professional experience?",
+                    "answer": exp_text,
+                    "content": exp_text,
+                    "category": "experience",
+                    "source_type": "auto",
+                    "is_active": True,
+                }
+                
+                existing_exp = sb.table("chatbot_knowledge").select("id").eq("category", "experience").eq("source_type", "auto").execute().data
+                if existing_exp:
+                    sb.table("chatbot_knowledge").update(exp_knowledge).eq("id", existing_exp[0]["id"]).execute()
+                else:
+                    sb.table("chatbot_knowledge").insert(exp_knowledge).execute()
+                synced += 1
+                print("[smart_sync] ✓ Experience synced")
+        except Exception as e:
+            print(f"[smart_sync] Experience error: {e}")
+        
+        # 3. Tech Stack knowledge
+        print("[smart_sync] Syncing tech stack...")
+        try:
+            techs = sb.table("tech_stack").select("*").eq("is_visible", True).order("display_order").execute().data or []
+            if techs:
+                tech_by_cat = {}
+                for t in techs:
+                    cat = t.get("category", "General")
+                    tech_by_cat.setdefault(cat, []).append(t.get("name", ""))
+                
+                tech_text = "\n".join(
+                    f"• {cat}: {', '.join(items)}"
+                    for cat, items in tech_by_cat.items()
+                )
+                
+                tech_knowledge = {
+                    "title": "Technical Skills & Stack",
+                    "question": "What technologies and skills do you have?",
+                    "answer": tech_text,
+                    "content": tech_text,
+                    "category": "tech",
+                    "source_type": "auto",
+                    "is_active": True,
+                }
+                
+                existing_tech = sb.table("chatbot_knowledge").select("id").eq("category", "tech").eq("source_type", "auto").execute().data
+                if existing_tech:
+                    sb.table("chatbot_knowledge").update(tech_knowledge).eq("id", existing_tech[0]["id"]).execute()
+                else:
+                    sb.table("chatbot_knowledge").insert(tech_knowledge).execute()
+                synced += 1
+                print("[smart_sync] ✓ Tech stack synced")
+        except Exception as e:
+            print(f"[smart_sync] Tech stack error: {e}")
+        
+        # 4. Courses knowledge
+        print("[smart_sync] Syncing courses...")
+        try:
+            courses = sb.table("courses").select("*").eq("is_visible", True).order("display_order").limit(10).execute().data or []
+            if courses:
+                course_text = "\n".join(
+                    f"• {c.get('title', 'Course')}: {c.get('description', 'Professional course')}"
+                    for c in courses
+                )
+                
+                course_knowledge = {
+                    "title": "Courses & Training",
+                    "question": "What courses and training do you offer?",
+                    "answer": course_text,
+                    "content": course_text,
+                    "category": "courses",
+                    "source_type": "auto",
+                    "is_active": True,
+                }
+                
+                existing_courses = sb.table("chatbot_knowledge").select("id").eq("category", "courses").eq("source_type", "auto").execute().data
+                if existing_courses:
+                    sb.table("chatbot_knowledge").update(course_knowledge).eq("id", existing_courses[0]["id"]).execute()
+                else:
+                    sb.table("chatbot_knowledge").insert(course_knowledge).execute()
+                synced += 1
+                print("[smart_sync] ✓ Courses synced")
+        except Exception as e:
+            print(f"[smart_sync] Courses error: {e}")
+        
+        # 5. Achievements/Accomplishments knowledge
+        print("[smart_sync] Syncing achievements...")
+        try:
+            achievements = sb.table("accomplishments").select("*").eq("is_visible", True).order("display_order").limit(10).execute().data or []
+            if achievements:
+                achieve_text = "\n".join(
+                    f"• {a.get('title', 'Achievement')}: {a.get('description', '')}"
+                    for a in achievements
+                )
+                
+                achieve_knowledge = {
+                    "title": "Achievements & Accomplishments",
+                    "question": "What are your achievements and accomplishments?",
+                    "answer": achieve_text,
+                    "content": achieve_text,
+                    "category": "achievements",
+                    "source_type": "auto",
+                    "is_active": True,
+                }
+                
+                existing_achieve = sb.table("chatbot_knowledge").select("id").eq("category", "achievements").eq("source_type", "auto").execute().data
+                if existing_achieve:
+                    sb.table("chatbot_knowledge").update(achieve_knowledge).eq("id", existing_achieve[0]["id"]).execute()
+                else:
+                    sb.table("chatbot_knowledge").insert(achieve_knowledge).execute()
+                synced += 1
+                print("[smart_sync] ✓ Achievements synced")
+        except Exception as e:
+            print(f"[smart_sync] Achievements error: {e}")
+        
+        # 6. Projects knowledge (using existing auto_sync but in batch)
+        print("[smart_sync] Syncing projects...")
+        try:
+            projects = sb.table("projects").select("*").eq("is_visible", True).order("display_order").limit(20).execute().data or []
+            for project in projects:
+                await auto_sync_project_to_knowledge(project["id"], project)
+            if projects:
+                synced += len(projects)
+                print(f"[smart_sync] ✓ {len(projects)} projects synced")
+        except Exception as e:
+            print(f"[smart_sync] Projects error: {e}")
+        
+        print(f"[smart_sync] Complete! Total sections synced: {synced}")
+        return synced
+        
+    except Exception as e:
+        print(f"[smart_sync_all_knowledge] Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
+        return 0
+
+
+@router.post("/knowledge/sync-projects")
+async def sync_all_projects_to_knowledge():
+    """Manually trigger comprehensive sync of ALL portfolio pages to knowledge base."""
+    try:
+        print("[/knowledge/sync-projects] Starting smart sync...")
+        synced = await smart_sync_all_knowledge()
+        message = f"Synced {synced} portfolio sections to knowledge base (bio, experience, tech, courses, achievements, projects)"
+        print(f"[/knowledge/sync-projects] ✓ Success: {message}")
+        return {"synced": synced, "message": message, "status": "success"}
+    except Exception as e:
+        print(f"[/knowledge/sync-projects] ERROR: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Sync failed: {str(e)}")
+
+
+@router.post("/knowledge/sync-simple")
+async def sync_projects_simple():
+    """Quick sync of just projects (legacy endpoint)."""
+    try:
+        print("[/knowledge/sync-simple] Syncing projects only...")
+        projects = db().table("projects").select("*").execute().data or []
+        synced = 0
+        for project in projects:
+            await auto_sync_project_to_knowledge(project["id"], project)
+            synced += 1
+        return {"synced": synced, "message": f"Synced {synced} projects"}
+    except Exception as e:
+        print(f"[/knowledge/sync-simple] ERROR: {type(e).__name__}: {e}")
+        raise HTTPException(500, f"Sync failed: {str(e)}")
 
 
 # ── Contact Messages ──────────────────────────────────────────
