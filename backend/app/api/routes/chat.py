@@ -19,14 +19,19 @@ import httpx
 from app.core.config import settings
 from app.core.supabase import get_supabase
 import json, re, httpx
+import asyncio
+from datetime import datetime, timedelta
 
 router  = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 SESSION_MEMORY: dict[str, list[str]] = {}
 SESSION_MEMORY_LIMIT = 12
 
+# System prompt cache (5 min expiry)
+_system_prompt_cache: dict = {"prompt": None, "expires_at": None}
+
 async def get_hf_embedding(text: str) -> list:
-    """Fetch embeddings from Hugging Face Inference API."""
+    """Fetch embeddings from Hugging Face Inference API with timeout."""
     if not settings.HUGGINGFACE_API_KEY:
         return []
 
@@ -34,30 +39,94 @@ async def get_hf_embedding(text: str) -> list:
     headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(api_url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+        async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+            response = await asyncio.wait_for(
+                client.post(api_url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}}),
+                timeout=10.0
+            )
             if response.status_code == 200:
                 return response.json()
+    except asyncio.TimeoutError:
+        print(f"[HF Error] Request timeout")
     except Exception as e:
         print(f"[HF Error] {e}")
     return []
 
 
-# ── Build system prompt dynamically from DB ────────────────────
+# ── Build system prompt with CACHING and TIMEOUTS ────────────────────
 async def build_system_prompt() -> str:
-    """Fetch live data from Supabase to build an up-to-date system prompt."""
+    """Fetch live data from Supabase to build an up-to-date system prompt (with 5-min cache)."""
+    
+    # Check cache first
+    global _system_prompt_cache
+    if _system_prompt_cache["prompt"] and _system_prompt_cache["expires_at"]:
+        if datetime.now() < _system_prompt_cache["expires_at"]:
+            print("[build_system_prompt] Using cached prompt")
+            return _system_prompt_cache["prompt"]
+    
     try:
-        sb   = get_supabase()
-        bio  = sb.table("bio").select("*").eq("id", 1).single().execute().data or {}
-        proj = sb.table("projects").select("title,description,tech_tags,github_url,live_url").eq("is_visible", True).order("display_order").limit(10).execute().data or []
-        tech = sb.table("tech_stack").select("name,category,level").eq("is_visible", True).order("display_order").execute().data or []
-        exp  = sb.table("experience").select("*").order("end_date", desc=True).limit(10).execute().data or []
-
+        sb = get_supabase()
+        
+        # Fetch core data with timeouts (timeout = 5 seconds per query)
+        timeout_secs = 5.0
+        
         try:
-            # Fetch all active knowledge (both manual and auto-generated from all portfolio pages)
-            kb = sb.table("chatbot_knowledge").select("*").eq("is_active", True).execute().data or []
+            bio = await asyncio.wait_for(
+                asyncio.to_thread(lambda: sb.table("bio").select("*").eq("id", 1).single().execute().data or {}),
+                timeout=timeout_secs
+            )
+        except asyncio.TimeoutError:
+            print("[build_system_prompt] BIO query timeout")
+            bio = {}
+        except Exception as e:
+            print(f"[build_system_prompt] BIO fetch error: {e}")
+            bio = {}
+        
+        try:
+            proj = await asyncio.wait_for(
+                asyncio.to_thread(lambda: sb.table("projects").select("title,description,tech_tags,github_url,live_url").eq("is_visible", True).order("display_order").limit(10).execute().data or []),
+                timeout=timeout_secs
+            )
+        except asyncio.TimeoutError:
+            print("[build_system_prompt] PROJECTS query timeout")
+            proj = []
+        except Exception as e:
+            print(f"[build_system_prompt] PROJECTS fetch error: {e}")
+            proj = []
+        
+        try:
+            tech = await asyncio.wait_for(
+                asyncio.to_thread(lambda: sb.table("tech_stack").select("name,category,level").eq("is_visible", True).order("display_order").execute().data or []),
+                timeout=timeout_secs
+            )
+        except asyncio.TimeoutError:
+            print("[build_system_prompt] TECH query timeout")
+            tech = []
+        except Exception as e:
+            print(f"[build_system_prompt] TECH fetch error: {e}")
+            tech = []
+        
+        try:
+            exp = await asyncio.wait_for(
+                asyncio.to_thread(lambda: sb.table("experience").select("*").order("end_date", desc=True).limit(10).execute().data or []),
+                timeout=timeout_secs
+            )
+        except asyncio.TimeoutError:
+            print("[build_system_prompt] EXPERIENCE query timeout")
+            exp = []
+        except Exception as e:
+            print(f"[build_system_prompt] EXPERIENCE fetch error: {e}")
+            exp = []
+
+        # Fetch knowledge with longer timeout (optional, non-critical)
+        kb_text = ""
+        try:
+            kb = await asyncio.wait_for(
+                asyncio.to_thread(lambda: sb.table("chatbot_knowledge").select("*").eq("is_active", True).limit(50).execute().data or []),
+                timeout=8.0  # Longer timeout for optional knowledge
+            )
             
-            # Format knowledge entries: Q&A or content, grouped by category
+            # Format knowledge entries
             kb_by_cat = {}
             for k in kb:
                 cat = k.get("category", "general").upper()
@@ -65,10 +134,8 @@ async def build_system_prompt() -> str:
                     kb_by_cat[cat] = []
                 
                 if k.get("question") and k.get("answer"):
-                    # Q&A format
                     kb_by_cat[cat].append(f"Q: {k['question']}\nA: {k['answer']}")
                 else:
-                    # Content format (fallback for manual entries without Q&A)
                     content = k.get("content") or k.get("answer") or k.get("title", "")
                     if content:
                         kb_by_cat[cat].append(f"• {content}")
@@ -81,9 +148,10 @@ async def build_system_prompt() -> str:
                 kb_entries.append("")
             
             kb_text = "\n".join(kb_entries) if kb_entries else ""
+        except asyncio.TimeoutError:
+            print("[build_system_prompt] Knowledge query timeout (continuing without knowledge)")
         except Exception as e:
-            print(f"[build_system_prompt] Knowledge fetch error: {e}")
-            kb_text = ""
+            print(f"[build_system_prompt] Knowledge fetch error: {e} (continuing without knowledge)")
 
         project_list = "\n".join(
             f"  • {p['title']}: {p['description'][:100]}... | Tech: {', '.join(p.get('tech_tags', [])[:4])}"
@@ -235,10 +303,16 @@ If a user asks for them, politely refuse and continue helping with public inform
 
 Important: The LEAD_CAPTURED and UNKNOWN_QUESTION markers are part of the required output contract. They are not leaks and must appear exactly when applicable.
 """
+        
+        # Cache the prompt for 5 minutes
+        _system_prompt_cache["prompt"] = prompt
+        _system_prompt_cache["expires_at"] = datetime.now() + timedelta(minutes=5)
+        print("[build_system_prompt] Prompt cached (expires in 5 min)")
+        
         return prompt
 
     except Exception as e:
-        print(f"[build_system_prompt] Exception: {type(e).__name__}: {e}")
+        print(f"[build_system_prompt] Fatal exception: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
         return """You are an AI assistant for Sandip Gupta's portfolio.
@@ -247,9 +321,9 @@ Answer questions about his work warmly and concisely (2-4 sentences).
 If asked about hiring/collaboration, ask for their contact details (name, email, phone, and project
 description — all four are required, ask again if phone is missing). Once you have all four, thank
 them, tell them Sandip will personally review it, and append at the end of your reply:
-LEAD_CAPTURED:{"name":"...","email":"...","phone":"...","context":"..."}
+LEAD_CAPTURED:{{"name":"...","email":"...","phone":"...","context":"..."}}
 If you don't know something, say so and append:
-UNKNOWN_QUESTION:{"question":"..."}
+UNKNOWN_QUESTION:{{"question":"..."}}
 Both markers are stripped automatically before the visitor sees them."""
 
 
@@ -403,23 +477,37 @@ async def chat(request: Request, body: ChatRequest):
 
     if settings.PINECONE_API_KEY and history:
         try:
-            rag = await _get_rag_context(history[-1].content)
+            rag = await asyncio.wait_for(_get_rag_context(history[-1].content), timeout=5.0)
             if rag:
                 messages[0]["content"] += f"\n\n## Relevant Knowledge Base Context\n{rag}"
-        except Exception:
-            pass
+        except asyncio.TimeoutError:
+            print("[chat] RAG context fetch timeout (continuing without RAG)")
+        except Exception as e:
+            print(f"[chat] RAG context fetch error: {e} (continuing without RAG)")
 
     async def stream():
         full = ""
         try:
             client  = AsyncGroq(api_key=settings.GROQ_API_KEY)
-            stream_ = await client.chat.completions.create(
-                model=settings.GROQ_MODEL,
-                messages=messages,
-                max_tokens=350,
-                temperature=0.2,
-                stream=True,
-            )
+            
+            # Wrap Groq call with timeout (30 seconds)
+            try:
+                stream_ = await asyncio.wait_for(
+                    client.chat.completions.create(
+                        model=settings.GROQ_MODEL,
+                        messages=messages,
+                        max_tokens=350,
+                        temperature=0.2,
+                        stream=True,
+                    ),
+                    timeout=30.0
+                )
+            except asyncio.TimeoutError:
+                msg = "The AI is taking too long to respond. Please try again."
+                yield f"data: {json.dumps({'text': msg})}\n\n"
+                yield "data: [DONE]\n\n"
+                return
+            
             async for chunk in stream_:
                 delta = chunk.choices[0].delta.content or ""
                 full += delta
@@ -427,6 +515,9 @@ async def chat(request: Request, body: ChatRequest):
                 if clean:
                     yield f"data: {json.dumps({'text': clean})}\n\n"
 
+        except asyncio.TimeoutError:
+            msg = "The AI is taking too long to respond. Please try again."
+            yield f"data: {json.dumps({'text': msg})}\n\n"
         except Exception as e:
             err = str(e).lower()
             if "api_key" in err or "authentication" in err or "401" in err:
@@ -435,8 +526,11 @@ async def chat(request: Request, body: ChatRequest):
                 msg = "I'm getting a lot of messages right now. Please try again in a minute!"
             elif "model" in err and ("not found" in err or "access" in err):
                 msg = "The configured Groq model is unavailable for this account. Please update GROQ_MODEL in backend/.env."
+            elif "timeout" in err:
+                msg = "The AI is taking too long to respond. Please try again."
             else:
                 msg = "Sorry, something went wrong. Please try again or contact Sandip directly on LinkedIn."
+                print(f"[chat] Unexpected error: {type(e).__name__}: {e}")
             yield f"data: {json.dumps({'text': msg})}\n\n"
         finally:
             if body.session_id:

@@ -2,23 +2,25 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 // ── Admin auth store ───────────────────────────────────────
+// Note: Token management now handled by api.ts (getAccessToken, setTokens, etc.)
+// This store tracks login state for UI purposes
 interface AuthState {
-  token: string | null
-  setToken: (token: string) => void
+  isAuthenticated: boolean
+  setAuthenticated: (val: boolean) => void
   logout: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      token: null,
-      setToken: (token) => {
-        set({ token })
-        localStorage.setItem('admin_token', token)
+      isAuthenticated: !!localStorage.getItem('admin_access_token'),
+      setAuthenticated: (val) => {
+        set({ isAuthenticated: val })
       },
       logout: () => {
-        set({ token: null })
-        localStorage.removeItem('admin_token')
+        set({ isAuthenticated: false })
+        localStorage.removeItem('admin_access_token')
+        localStorage.removeItem('admin_refresh_token')
       },
     }),
     { name: 'admin-auth' }

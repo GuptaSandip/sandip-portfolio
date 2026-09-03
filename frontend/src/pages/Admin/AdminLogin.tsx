@@ -11,19 +11,19 @@ export default function AdminLogin() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const setToken = useAuthStore((s) => s.setToken)
+  const setAuthenticated = useAuthStore((s) => s.setAuthenticated)
   const navigate = useNavigate()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
     try {
-      const { access_token } = await adminLogin(username, password)
-      setToken(access_token)
+      await adminLogin(username, password)
+      setAuthenticated(true)
       toast.success('Welcome back, Sandip.')
       navigate('/admin', { replace: true })
-    } catch {
-      toast.error('Invalid credentials')
+    } catch (err: any) {
+      toast.error(err.message || 'Invalid credentials')
     } finally {
       setLoading(false)
     }

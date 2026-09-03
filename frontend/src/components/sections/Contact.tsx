@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Send, Github, Linkedin, Twitter, Mail, MapPin, MessageSquare, CheckCircle } from 'lucide-react'
+import { Send, Github, Linkedin, Twitter, Mail, MapPin, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react'
+import { z } from 'zod'
 import { FadeUp, SlideLeft, SlideRight, SectionLabel } from './AnimatedSection'
 
 const SOCIALS = [
@@ -12,22 +13,88 @@ const SOCIALS = [
 
 const ease = [0.21, 0.47, 0.32, 0.98] as const
 
+// Validation schema
+const contactSchema = z.object({
+  name: z.string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be less than 100 characters'),
+  email: z.string()
+    .email('Please enter a valid email address'),
+  message: z.string()
+    .min(5, 'Message must be at least 5 characters')
+    .max(5000, 'Message must be less than 5000 characters'),
+})
+
+type ContactForm = z.infer<typeof contactSchema>
+
+interface FieldErrors {
+  name?: string
+  email?: string
+  message?: string
+}
+
 export default function Contact() {
-  const [form, setForm]       = useState({ name: '', email: '', message: '' })
+  const [form, setForm]     = useState<ContactForm>({ name: '', email: '', message: '' })
+  const [errors, setErrors] = useState<FieldErrors>({})
   const [sending, setSending] = useState(false)
-  const [sent, setSent]       = useState(false)
-  const [error, setError]     = useState('')
+  const [sent, setSent]     = useState(false)
+  const [error, setError]   = useState('')
+
+  // Real-time field validation
+  function validateField(field: keyof ContactForm, value: string) {
+    try {
+      const parsed = contactSchema.safeParse({ ...form, [field]: value })
+      if (parsed.success) {
+        setErrors((e) => ({ ...e, [field]: undefined }))
+        return
+      }
+
+      const fieldError = parsed.error.issues.find((issue) => issue.path[0] === field)
+      setErrors((e) => ({ ...e, [field]: fieldError?.message }))
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setErrors((e) => ({ ...e, [field]: err.errors[0]?.message }))
+      }
+    }
+  }
+
+  function handleChange(field: keyof ContactForm, value: string) {
+    setForm(f => ({ ...f, [field]: value }))
+    if (value.length > 0) {
+      validateField(field, value)
+    } else {
+      setErrors(e => ({ ...e, [field]: undefined }))
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSending(true)
     setError('')
+    setErrors({})
+
+    // Validate entire form
+    try {
+      contactSchema.parse(form)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: FieldErrors = {}
+        err.errors.forEach(error => {
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as keyof ContactForm] = error.message
+          }
+        })
+        setErrors(fieldErrors)
+      }
+      return
+    }
+
+    setSending(true)
     try {
       const base = import.meta.env.VITE_API_URL || ''
-      const res  = await fetch(`${base}/api/contact/`, {
-        method:  'POST',
+      const res = await fetch(`${base}/api/contact/`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(form),
+        body: JSON.stringify(form),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setSent(true)

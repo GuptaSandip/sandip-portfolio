@@ -22,6 +22,12 @@ const SUGGESTIONS = [
   'How can I contact him?',
 ]
 
+const panelStyle: React.CSSProperties = {
+  background: 'var(--bg-surface)',
+  border: '1px solid var(--bd)',
+  boxShadow: 'var(--card-shadow)',
+}
+
 let msgCounter = 0
 function uid() { return `msg_${++msgCounter}_${Date.now()}` }
 
@@ -116,11 +122,11 @@ export default function ChatWidget() {
         whileTap={{ scale: 0.92 }}
         style={{
           position: 'fixed', bottom: '28px', right: '28px', zIndex: 1000,
-          width: '52px', height: '52px', borderRadius: '50%',
+          width: '58px', height: '58px', borderRadius: '50%',
           background: 'var(--accent)',
-          border: 'none', cursor: 'pointer',
+          border: '1px solid rgba(255,255,255,0.14)', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 24px rgba(184, 137, 82, 0.35)',
+          boxShadow: '0 10px 28px rgba(184, 137, 82, 0.28)',
         }}
         aria-label="Open AI chatbot"
       >
@@ -152,55 +158,57 @@ export default function ChatWidget() {
             transition={{ duration: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
             className="surface-card"
             style={{
+              ...panelStyle,
               position: 'fixed', bottom: '92px', right: '28px', zIndex: 999,
-              width: '360px', maxWidth: 'calc(100vw - 32px)',
-              height: '520px', maxHeight: 'calc(100vh - 120px)',
-              borderRadius: '16px',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+              width: '368px', maxWidth: 'calc(100vw - 26px)',
+              height: '540px', maxHeight: 'calc(100vh - 110px)',
+              borderRadius: '18px',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
             }}
           >
-            <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Bot size={16} style={{ color: 'white' }} />
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.006)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 10px rgba(184,137,82,0.15)' }}>
+                  <Bot size={14} style={{ color: 'white' }} />
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: '14px', color: 'var(--text-card-1)' }}>Ask About Sandip</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 2, repeat: Infinity }}
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: '14px', color: 'var(--text-card-1)', lineHeight: 1.2 }}>Sandip's Assistant</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                    <motion.div animate={{ opacity: [0.8, 0.3, 0.8] }} transition={{ duration: 2.5, repeat: Infinity }}
                       style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--accent)' }} />
-                    <span style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent)' }}>Online</span>
+                    <span style={{ fontSize: '9px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent)', opacity: 0.8 }}>Online</span>
                   </div>
                 </div>
               </div>
-              <button onClick={reset} title="Clear chat" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-card-3)', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                <RefreshCw size={14} />
-              </button>
+              <motion.button onClick={reset} title="Clear chat" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.96 }} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid var(--bd)', borderRadius: '7px', cursor: 'pointer', color: 'var(--text-card-3)', padding: '5px 7px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}>
+                <RefreshCw size={13} />
+              </motion.button>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(0,0,0,0.015)' }}>
               {messages.map((msg, i) => (
                 <motion.div key={msg.id}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.22 }}
                   style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
-                  <div style={{ width: '26px', height: '26px', borderRadius: '6px', flexShrink: 0, background: msg.role === 'user' ? 'var(--accent-muted)' : 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '24px', height: '24px', borderRadius: '7px', flexShrink: 0, background: msg.role === 'user' ? 'rgba(184,137,82,0.12)' : 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 8px rgba(0,0,0,0.06)' }}>
                     {msg.role === 'user'
-                      ? <User size={12} style={{ color: 'var(--accent)' }} />
-                      : <Bot size={12} style={{ color: 'white' }} />
+                      ? <User size={11} style={{ color: 'var(--accent)' }} />
+                      : <Bot size={11} style={{ color: 'white' }} />
                     }
                   </div>
                   <div style={{
-                    maxWidth: '78%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '12px 4px 12px 12px' : '4px 12px 12px 12px',
-                    background: msg.role === 'user' ? 'var(--accent-muted)' : 'var(--bg-panel)',
+                    maxWidth: '78%', padding: '9px 12px', borderRadius: msg.role === 'user' ? '11px 3px 11px 11px' : '3px 11px 11px 11px',
+                    background: msg.role === 'user' ? 'rgba(184,137,82,0.1)' : 'var(--bg-panel)',
                     border: '1px solid var(--bd)',
-                    fontSize: '13px', color: 'var(--text-card-1)', lineHeight: 1.65,
+                    fontSize: '13px', color: 'var(--text-card-1)', lineHeight: 1.6,
                     whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    transition: 'all 0.2s ease',
                   }}>
                     {msg.content}
                     {streaming && i === messages.length - 1 && msg.role === 'assistant' && !msg.content && (
-                      <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+                      <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center', marginLeft: '8px', verticalAlign: 'middle' }}>
                         {[0, 1, 2].map(d => (
                           <motion.span key={d} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, delay: d * 0.2, repeat: Infinity }}
                             style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
@@ -212,10 +220,10 @@ export default function ChatWidget() {
               ))}
 
               {messages.length === 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   {SUGGESTIONS.map(s => (
-                    <motion.button key={s} onClick={() => send(s)} whileHover={{ borderColor: 'var(--accent)' }}
-                      style={{ textAlign: 'left', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-panel)', border: '1px solid var(--bd)', fontSize: '12px', color: 'var(--text-card-2)', cursor: 'pointer', transition: 'border-color 0.15s' }}>
+                    <motion.button key={s} onClick={() => send(s)} whileHover={{ borderColor: 'var(--accent)', y: -2, boxShadow: '0 6px 16px rgba(184,137,82,0.1)' }} whileTap={{ y: 0 }}
+                      style={{ textAlign: 'left', padding: '9px 11px', borderRadius: '9px', background: 'var(--bg-panel)', border: '1px solid var(--bd)', fontSize: '12px', color: 'var(--text-card-2)', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
                       {s}
                     </motion.button>
                   ))}
@@ -223,7 +231,7 @@ export default function ChatWidget() {
               )}
 
               {limitHit && (
-                <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'var(--accent-muted)', border: '1px solid rgba(184,137,82,0.25)', fontSize: '12px', color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace', textAlign: 'center' }}>
+                <div style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(184,137,82,0.12)', border: '1px solid rgba(184,137,82,0.22)', fontSize: '12px', color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace', textAlign: 'center' }}>
                   Chat limit reached. Refresh to continue or reach out via LinkedIn.
                 </div>
               )}
@@ -231,22 +239,22 @@ export default function ChatWidget() {
               <div ref={bottomRef} />
             </div>
 
-            <div style={{ padding: '12px 14px', borderTop: '1px solid var(--bd)', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ padding: '11px 13px', borderTop: '1px solid var(--bd)', display: 'flex', gap: '7px', alignItems: 'center', background: 'rgba(0,0,0,0.008)' }}>
               <input
                 ref={inputRef}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKey}
                 disabled={streaming || limitHit}
-                placeholder="Ask anything about Sandip..."
+                placeholder="Ask about Sandip..."
                 className="field"
-                style={{ flex: 1, padding: '9px 12px', fontSize: '13px' }}
+                style={{ flex: 1, padding: '9px 11px', fontSize: '13px', borderRadius: '9px', border: '1px solid var(--bd)', background: 'var(--bg-panel)', color: 'var(--text-card-1)', transition: 'all 0.2s ease', boxShadow: input ? '0 1px 6px rgba(184,137,82,0.08)' : 'none' }}
               />
               <motion.button
                 onClick={() => send()} disabled={!input.trim() || streaming || limitHit}
-                whileHover={input.trim() ? { scale: 1.06 } : {}}
+                whileHover={input.trim() ? { scale: 1.06, y: -1 } : {}}
                 whileTap={{ scale: 0.94 }}
-                style={{ width: '36px', height: '36px', borderRadius: '8px', border: 'none', cursor: input.trim() ? 'pointer' : 'not-allowed', background: input.trim() ? 'var(--accent)' : 'var(--bg-panel)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                style={{ width: '36px', height: '36px', borderRadius: '9px', border: 'none', cursor: input.trim() ? 'pointer' : 'not-allowed', background: input.trim() ? 'var(--accent)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: input.trim() ? '0 6px 16px rgba(184,137,82,0.2)' : 'none', transition: 'all 0.2s ease' }}
               >
                 {streaming
                   ? <RefreshCw size={14} style={{ color: 'white', animation: 'spin 0.8s linear infinite' }} />

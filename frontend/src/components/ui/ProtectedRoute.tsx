@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/store'
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const token = useAuthStore((s) => s.token)
-  if (!token) {
+  // Check if access token exists
+  const hasAccessToken = !!localStorage.getItem('admin_access_token')
+  if (!hasAccessToken) {
     return <Navigate to="/admin/login" replace />
   }
   return <>{children}</>

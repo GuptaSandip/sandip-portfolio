@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 
 export function useAdminAuth() {
-  const { token, logout } = useAuthStore()
+  const { isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/admin/login', { replace: true })
     }
-  }, [token, navigate])
+  }, [isAuthenticated, navigate])
 
-  return { token, logout }
+  return { isAuthenticated, logout }
 }
