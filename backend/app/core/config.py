@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
     HUGGINGFACE_API_KEY: str = ""
+    HF_TOKEN: str = ""
+
+    @property
+    def hf_api_key(self) -> str:
+        return self.HUGGINGFACE_API_KEY or self.HF_TOKEN
 
     # Pinecone
     PINECONE_API_KEY: str = ""
@@ -92,14 +97,14 @@ class Settings(BaseSettings):
             print("⚠️  WARNING: SUPABASE_SERVICE_KEY not set — admin operations may fail")
         
         if errors:
-            print("\n🚨 STARTUP VALIDATION ERRORS:\n")
+            print("\n[!] STARTUP VALIDATION ERRORS:\n")
             for err in errors:
                 print(f"  {err}")
             print("\nSet environment variables in backend/.env or .env.local\n")
             if not self.DEBUG:
                 sys.exit(1)
         else:
-            print("✅ Environment validation passed")
+            print("[OK] Environment validation passed")
 
     class Config:
         env_file = ".env"

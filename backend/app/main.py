@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -14,11 +16,20 @@ from app.api.routes import (
 
 limiter = Limiter(key_func=get_remote_address)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Pre-warm system prompt cache and client singletons on startup in background
+    asyncio.create_task(chat.warmup_chat())
+    yield
+
+
 app = FastAPI(
     title="Sandip Gupta Portfolio API",
     version="1.0.0",
     docs_url="/api/docs" if settings.DEBUG else None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -51,13 +62,33 @@ app.include_router(auth_route.router,      prefix="/api/auth")
 app.include_router(admin.router,           prefix="/api/admin")
 
 
-@app.get("/api/health")
+async def _run_health_check():
+    # If system prompt cache is cold, warm it in the background
+    if not chat._system_prompt_cache.get("prompt"):
+        asyncio.create_task(chat.warmup_chat())
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "chat_warm": bool(chat._system_prompt_cache.get("prompt")),
+    }
+
+
+@app.get("/health")
 async def health():
-    return {"status": "ok", "version": "1.0.0"}
+    """Standard health check endpoint for cronjobs and monitoring."""
+    return await _run_health_check()
+
+
+@app.get("/api/health")
+async def api_health():
+    """API-prefixed health check endpoint for reverse proxies and cronjobs."""
+    return await _run_health_check()
+
 
 @app.get("/")
 async def root():
     return {
         "message": "Backend is running",
-        "other_api": ["/api/health", "/api/docs"],
+        "health_urls": ["/health", "/api/health"],
+        "chat_warm": bool(chat._system_prompt_cache.get("prompt")),
     }

@@ -12,6 +12,7 @@ from app.models.experience import ExperienceCreate, ExperienceUpdate
 from app.models.resume_overview import ResumeOverviewCreate, ResumeOverviewUpdate
 from app.models.knowledge import KnowledgeCreate, KnowledgeUpdate
 from app.models.pinned_repo import PinnedRepoCreate, PinnedRepoUpdate
+from app.api.routes.chat import invalidate_system_prompt_cache
 import io, csv
 
 router = APIRouter(dependencies=[Depends(get_current_admin)])
@@ -63,6 +64,7 @@ async def admin_update_bio(data: BioUpdate):
     result = db().table("bio").update(payload).eq("id", 1).execute()
     if not result.data:
         raise HTTPException(500, "Update failed — check Supabase service key")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
@@ -95,6 +97,7 @@ async def admin_create_project(data: ProjectCreate):
     project = result.data[0]
     # Auto-generate knowledge entry for this project
     await auto_sync_project_to_knowledge(project["id"], project)
+    invalidate_system_prompt_cache()
     return project
 
 
@@ -107,12 +110,14 @@ async def admin_update_project(pid: str, data: ProjectUpdate):
     project = result.data[0]
     # Auto-sync knowledge entry for this project
     await auto_sync_project_to_knowledge(pid, project)
+    invalidate_system_prompt_cache()
     return project
 
 
 @router.delete("/projects/{pid}")
 async def admin_delete_project(pid: str):
     db().table("projects").delete().eq("id", pid).execute()
+    invalidate_system_prompt_cache()
     return {"deleted": True}
 
 
@@ -127,6 +132,7 @@ async def admin_create_tech(data: TechCreate):
     result = db().table("tech_stack").insert(data.model_dump()).execute()
     if not result.data:
         raise HTTPException(500, "Create failed")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
@@ -136,12 +142,14 @@ async def admin_update_tech(tid: str, data: TechUpdate):
     result = db().table("tech_stack").update(payload).eq("id", tid).execute()
     if not result.data:
         raise HTTPException(404, "Tech item not found")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
 @router.delete("/tech-stack/{tid}")
 async def admin_delete_tech(tid: str):
     db().table("tech_stack").delete().eq("id", tid).execute()
+    invalidate_system_prompt_cache()
     return {"deleted": True}
 
 
@@ -354,6 +362,7 @@ async def admin_create_experience(data: ExperienceCreate):
     result = db().table("experience").insert(payload).execute()
     if not result.data:
         raise HTTPException(500, "Create failed")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
@@ -368,12 +377,14 @@ async def admin_update_experience(eid: str, data: ExperienceUpdate):
     result = db().table("experience").update(payload).eq("id", eid).execute()
     if not result.data:
         raise HTTPException(404, "Experience not found")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
 @router.delete("/experience/{eid}")
 async def admin_delete_experience(eid: str):
     db().table("experience").delete().eq("id", eid).execute()
+    invalidate_system_prompt_cache()
     return {"deleted": True}
 
 
@@ -417,6 +428,7 @@ async def admin_create_knowledge(data: KnowledgeCreate):
     result = db().table("chatbot_knowledge").insert(data.model_dump()).execute()
     if not result.data:
         raise HTTPException(500, "Create failed")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
@@ -426,12 +438,14 @@ async def admin_update_knowledge(kid: str, data: KnowledgeUpdate):
     result = db().table("chatbot_knowledge").update(payload).eq("id", kid).execute()
     if not result.data:
         raise HTTPException(404, "Not found")
+    invalidate_system_prompt_cache()
     return result.data[0]
 
 
 @router.delete("/knowledge/{kid}")
 async def admin_delete_knowledge(kid: str):
     db().table("chatbot_knowledge").delete().eq("id", kid).execute()
+    invalidate_system_prompt_cache()
     return {"deleted": True}
 
 
